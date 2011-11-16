@@ -1,18 +1,18 @@
 {
 	"name": "error",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"description": "error handling utility",
 	"keywords": ["error", "arch", "utility"],
 	"author": "Jake Verbaten <raynos2@gmail.com>",
 	"main": "src/error",
 	"repository": "git://github.com/Raynos/error.git",
 	"engines": {
-		"node": "0.5.x"
+		"node": "0.6.x"
 	},
 	"dependencies": {
-		"fcombine": "0.0.3"
+		"fcombine": "0.0.4"
 	},
 	"devDependencies": {
-		"tester": "0.0.2"
+		"tester": "0.0.4"
 	}
 }

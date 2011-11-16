@@ -1,6 +1,6 @@
 {
 	"name": "fcombine",
-	"version": "0.0.3",
+	"version": "0.0.4",
 	"description": "function utility library",
 	"keywords": ["function", "f", "arch", "utility"],
 	"author": "Jake Verbaten <raynos2@gmail.com>",
@@ -8,9 +8,9 @@
 	"repository": "git://github.com/Raynos/fcombine.git",
 	"main": "src/f",
 	"engines": {
-		"node": "0.5.x"
+		"node": "0.6.x"
 	},
 	"devDependencies": {
-		"tester": "0.0.2"
+		"tester": "0.0.4"
 	}
 }
