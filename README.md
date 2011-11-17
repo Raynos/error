@@ -35,4 +35,30 @@ and if not it will call the callback
 		// handle data
 	});
 
+### error.thrower
+
+A simple function that will throw the first argument if it exists
+
+	error.passTo(error.thrower, function (err, data) {
+		// ...
+	});
+
+### error.whitelist
+
+A whitelisting function. Pass it a filter and a cb and an optional error handler.
+
+	error.whitelist(function (err) {
+		if (err.isSpecial) {
+			return true;
+		} else {
+			return false;
+		}
+	}, function (err, data) {
+		if (err.isSpecial) {
+			handleIt();
+		} else {
+			handle(data);
+		}
+	});
+
    [1]: http://www.github.com/Raynos/rest

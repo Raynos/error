@@ -29,6 +29,39 @@ module.exports = {
 		f(true);
 		assert.equal(flag, true);
 		assert.equal(f(null, 42), 42);
+	},
+	"test error.thrower": function () {
+		var flag = false;
+
+		try {
+			error.thrower(true);
+		} catch (e) {
+			flag = true
+		} finally {
+			assert.equal(flag, true);
+		}
+	},
+	"test error.whitelist": function () {
+		var flag = false;
+
+		function whitelist(err) {
+			if (err.trusted) {
+				return true;
+			}
+		}
+		function cb(err) {
+			if (err.trusted) {
+				flag = true;
+			}
+		}
+
+		try {
+			error.whitelist(whitelist, cb)({ foo: true });
+		} catch (e) {
+			assert(e.foo);
+		} 
+		error.whitelist(whitelist, cb)({ trusted: true });
+		assert(flag);
 	}
 };
 

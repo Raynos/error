@@ -15,7 +15,7 @@ var error = {
 	passTo: function _passTo(errorHandler, cb) {
 		return function _handleError(err) {
 			if (err) {
-				return errorHandler(err);
+				return errorHandler.apply(this, arguments);
 			} else {
 				return cb.apply(this, arguments);
 			}
@@ -31,11 +31,43 @@ var error = {
 		@return Function
 	*/
 	throw: function _throw(cb) {
-		return f.pre(function _throw(err) {
-			if (err) {
-				throw err;
+		return f.pre(error.thrower, cb);
+	},
+	/*
+		error throwing function. Takes one argument and if it exists
+		it will throw it
+
+		@param Object err - error to throw
+	*/
+	thrower: function (err) {
+		if (err) {
+			throw err;
+		}
+	},
+	/*
+		return a new function which will pass the arguments to the cb
+		if the error is whitelisted and pass it to the errorHandler if 
+		the error is not whitelisted
+
+		@param Function whitelist - A function to be called with the error
+			if it returns true then the error is whitelisted and the cb 
+			is invoked. If it returns falsey then the errorHandler is invoked
+		@param Function cb - invoked if the error is whitelisted
+		@param Function [optional] errorHandler. errorHandler to be invoked
+			the default value is error.thrower
+
+		@return Function
+	*/	
+	whitelist: function (whitelist, cb, errorHandler) {
+		errorHandler = errorHandler || error.thrower;
+
+		return function _handleError(err) {
+			if (whitelist(err)) {
+				return cb.apply(this, arguments);
+			} else {
+				return errorHandler.apply(this, arguments);
 			}
-		}, cb);
+		}
 	}
 }
 
