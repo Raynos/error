@@ -52,7 +52,7 @@ module.exports = {
 			}
 		}
 		function cb(err) {
-			if (err.trusted) {
+			if (err === null || err.trusted) {
 				flag = true;
 			}
 		}
@@ -65,6 +65,9 @@ module.exports = {
 		error.whitelist(whitelist, cb)({});
 		assert(!flag);
 		error.whitelist(whitelist, cb)({ trusted: true });
+		assert(flag);
+		flag = false;
+		error.whitelist(whitelist, cb)(null);
 		assert(flag);
 	}
 };

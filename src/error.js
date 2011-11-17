@@ -63,7 +63,7 @@ var error = {
 		errorHandler = errorHandler || error.thrower;
 
 		return function _handleError(err) {
-			var ret = whitelist(err);
+			var ret = (err === null ? true : whitelist(err));
 			if (ret === true) {
 				return cb.apply(this, arguments);
 			} else if (ret === false) {
