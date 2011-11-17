@@ -47,6 +47,8 @@ module.exports = {
 		function whitelist(err) {
 			if (err.trusted) {
 				return true;
+			} else if (err.throw) {
+				return false;
 			}
 		}
 		function cb(err) {
@@ -56,10 +58,12 @@ module.exports = {
 		}
 
 		try {
-			error.whitelist(whitelist, cb)({ foo: true });
+			error.whitelist(whitelist, cb)({ throw: true, foo: true });
 		} catch (e) {
 			assert(e.foo);
-		} 
+		}
+		error.whitelist(whitelist, cb)({});
+		assert(!flag);
 		error.whitelist(whitelist, cb)({ trusted: true });
 		assert(flag);
 	}

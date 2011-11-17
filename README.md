@@ -46,6 +46,7 @@ A simple function that will throw the first argument if it exists
 ### error.whitelist
 
 A whitelisting function. Pass it a filter and a cb and an optional error handler.
+If the filter returns true then invoke the cb, if it returns false invoke the error handler. If it returns neither don't do anything
 
 	error.whitelist(function (err) {
 		if (err.isSpecial) {

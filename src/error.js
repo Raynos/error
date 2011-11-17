@@ -51,7 +51,8 @@ var error = {
 
 		@param Function whitelist - A function to be called with the error
 			if it returns true then the error is whitelisted and the cb 
-			is invoked. If it returns falsey then the errorHandler is invoked
+			is invoked. If it returns false then the errorHandler is invoked
+			if it returns anything else then neither get invoked
 		@param Function cb - invoked if the error is whitelisted
 		@param Function [optional] errorHandler. errorHandler to be invoked
 			the default value is error.thrower
@@ -62,9 +63,10 @@ var error = {
 		errorHandler = errorHandler || error.thrower;
 
 		return function _handleError(err) {
-			if (whitelist(err)) {
+			var ret = whitelist(err);
+			if (ret === true) {
 				return cb.apply(this, arguments);
-			} else {
+			} else if (ret === false) {
 				return errorHandler.apply(this, arguments);
 			}
 		}
