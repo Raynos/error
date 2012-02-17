@@ -12,14 +12,19 @@ var error = {
 
 		@return Function
 	*/
-	passTo: function _passTo(errorHandler, cb) {
-		return function _handleError(err) {
+	passTo: function passTo(errorHandler, cb) {
+		return proxy;
+
+		function proxy(err) {
 			if (err) {
+				if (typeof errorHandler === "string") {
+					return this[errorHandler].apply(this, arguments);
+				}
 				return errorHandler.apply(this, arguments);
 			} else {
 				return cb.apply(this, arguments);
 			}
-		};
+		}
 	},
 	/*
 		return a new function which is the old function wrapped

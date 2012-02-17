@@ -1,6 +1,6 @@
 {
 	"name": "error",
-	"version": "0.0.5",
+	"version": "0.1.0",
 	"description": "error handling utility",
 	"keywords": ["error", "arch", "utility"],
 	"author": "Jake Verbaten <raynos2@gmail.com>",
@@ -11,6 +11,9 @@
 	},
 	"dependencies": {
 		"fcombine": "0.0.4"
+	},
+	"scripts": {
+		"test": "node test/error-test.js"
 	},
 	"devDependencies": {
 		"tester": "0.0.4"
