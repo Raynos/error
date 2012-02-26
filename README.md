@@ -2,6 +2,8 @@
 
 An error handling utility,
 
+## status: beta
+
 ## Blog posts
 
 coming soon!
