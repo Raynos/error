@@ -1,3 +1,4 @@
+[![build status](https://secure.travis-ci.org/Raynos/error.png)](http://travis-ci.org/Raynos/error)
 # error <a name="_error" href="#_error"><small><sup>link</sup></small></a>
 
 An error handling utility,
