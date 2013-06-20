@@ -1,67 +1,57 @@
-# error <a name="_error" href="#_error"><small><sup>link</sup></small></a>
+# error
 
-An error handling utility,
+<!--
+    [![build status][1]][2]
+    [![NPM version][3]][4]
+    [![Coverage Status][5]][6]
+    [![gemnasium Dependency Status][7]][8]
+    [![Davis Dependency status][9]][10]
+-->
 
-## status: beta
+<!-- [![browser support][11]][12] -->
 
-## Blog posts
+Custom errors
 
-coming soon!
+## Example
 
-## Examples 
+```js
+var ValidationError = require("error/validation")
+var OptionError = require("error/option")
 
- - [rest annotated code][1] Coming soon!
+var error = ValidationError([{
+  message: "Please enter required field",
+  attribute: "name"
+}, {
+  message: "Password must be at least 10 characters",
+  attribute: "password"
+}])
 
-## Documentation
+console.log("error.errors", error.errors)
 
-Annotated source code coming soon.
+var error = OptionError("Something went wrong", metaData)
 
-### error.throw(cb)
+console.log("error.option", error.option)
+```
 
-Returns a function which will throw the first parameter if it exists
+## Installation
 
-	error.throw(function (err, file) {
-		// no error handling
-		// error was thrown if exists
-		// do things with file
-	});
+`npm install error`
 
-### error.passTo(errorHandler, cb)
+## Contributors
 
-Returns a function which will pass the error to the error handler if it exists
-and if not it will call the callback
+ - Raynos
 
-	error.passTo(next, function (err, data) {
-		// no error handling.
-		// error was passed to next if exists
-		// handle data
-	});
+## MIT Licenced
 
-### error.thrower
-
-A simple function that will throw the first argument if it exists
-
-	error.passTo(error.thrower, function (err, data) {
-		// ...
-	});
-
-### error.whitelist
-
-A whitelisting function. Pass it a filter and a cb and an optional error handler.
-If the filter returns true then invoke the cb, if it returns false invoke the error handler. If it returns neither don't do anything
-
-	error.whitelist(function (err) {
-		if (err.isSpecial) {
-			return true;
-		} else {
-			return false;
-		}
-	}, function (err, data) {
-		if (err.isSpecial) {
-			handleIt();
-		} else {
-			handle(data);
-		}
-	});
-
-   [1]: http://www.github.com/Raynos/rest
+  [1]: https://secure.travis-ci.org/Raynos/error.png
+  [2]: https://travis-ci.org/Raynos/error
+  [3]: https://badge.fury.io/js/error.png
+  [4]: https://badge.fury.io/js/error
+  [5]: https://coveralls.io/repos/Raynos/error/badge.png
+  [6]: https://coveralls.io/r/Raynos/error
+  [7]: https://gemnasium.com/Raynos/error.png
+  [8]: https://gemnasium.com/Raynos/error
+  [9]: https://david-dm.org/Raynos/error.png
+  [10]: https://david-dm.org/Raynos/error
+  [11]: https://ci.testling.com/Raynos/error.png
+  [12]: https://ci.testling.com/Raynos/error
