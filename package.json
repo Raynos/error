@@ -1,15 +1,17 @@
 {
   "name": "error",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Custom errors",
   "keywords": [],
   "author": "Raynos <raynos2@gmail.com>",
   "repository": "git://github.com/Raynos/error.git",
   "main": "index",
   "homepage": "https://github.com/Raynos/error",
-  "contributors": [{
-    "name": "Raynos"
-  }],
+  "contributors": [
+    {
+      "name": "Raynos"
+    }
+  ],
   "bugs": {
     "url": "https://github.com/Raynos/error/issues",
     "email": "raynos2@gmail.com"
@@ -18,10 +20,12 @@
   "devDependencies": {
     "tape": "~1.0.2"
   },
-  "licenses": [{
-    "type": "MIT",
-    "url": "http://github.com/Raynos/error/raw/master/LICENSE"
-  }],
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://github.com/Raynos/error/raw/master/LICENSE"
+    }
+  ],
   "scripts": {
     "test": "node ./test/index.js",
     "start": "node ./index.js",
