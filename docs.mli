@@ -16,6 +16,8 @@ type ValidationError := {
 }
 
 error/option := (String, T) => OptionError<T>
-error/typed := (messagePattern: String, type: String)
-    => (...args: Any) => TypedError<String>
+error/typed := ({
+    message: String,
+    type: String
+}) => (...args: Any) => TypedError<String>
 error/validation := (Array<Error>) => ValidationError

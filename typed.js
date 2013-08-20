@@ -4,7 +4,10 @@ var slice = Array.prototype.slice
 
 module.exports = TypedError
 
-function TypedError(message, type) {
+function TypedError(opts) {
+    var message = opts.message
+    var type = opts.type
+
     return function createError() {
         var result = new Error()
         var args = slice.call(arguments)
