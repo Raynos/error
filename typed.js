@@ -13,6 +13,13 @@ function TypedError(opts) {
         var args = slice.call(arguments)
         args.unshift(message)
 
+        Object.defineProperty(result, "type", {
+            value: result.type,
+            enumerable: true,
+            writable: true,
+            configurable: true
+        })
+
         extend(result, opts)
         result.message = format.apply(null, args)
 
