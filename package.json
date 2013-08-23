@@ -16,7 +16,9 @@
     "url": "https://github.com/Raynos/error/issues",
     "email": "raynos2@gmail.com"
   },
-  "dependencies": {},
+  "dependencies": {
+    "xtend": "~2.0.6"
+  },
   "devDependencies": {
     "tape": "~1.0.2"
   },
