@@ -33,6 +33,26 @@ var error = OptionError("Something went wrong", metaData)
 console.log("error.option", error.option)
 ```
 
+## Typed Error
+
+```js
+var TypedError = require("error/typed")
+
+var ServerError = TypedError({
+  type: 'server.500.error',
+  statusCode: 500,
+  message: '%s server error, status=%d'
+})
+var ClientError = TypedError({
+  type: 'client.400.error',
+  statusCode: 400,
+  message: '%s client error, status=%d'
+})
+
+var error = ServerError('some title', 500)
+var error2 = ClientError('some title', 400)
+```
+
 ## Installation
 
 `npm install error`
