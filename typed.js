@@ -1,17 +1,13 @@
-var format = require("util").format
+var template = require("string-template")
 var extend = require("xtend/mutable")
-
-var slice = Array.prototype.slice
 
 module.exports = TypedError
 
-function TypedError(opts) {
-    var message = opts.message
+function TypedError(args) {
+    var message = args.message
 
-    return function createError() {
+    return function createError(opts) {
         var result = new Error()
-        var args = slice.call(arguments)
-        args.unshift(message)
 
         Object.defineProperty(result, "type", {
             value: result.type,
@@ -20,8 +16,10 @@ function TypedError(opts) {
             configurable: true
         })
 
-        extend(result, opts)
-        result.message = format.apply(null, args)
+        var options = extend({}, args, opts)
+
+        extend(result, options)
+        result.message = template(message, options)
 
         return result
     }

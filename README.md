@@ -39,18 +39,22 @@ console.log("error.option", error.option)
 var TypedError = require("error/typed")
 
 var ServerError = TypedError({
-  type: 'server.500.error',
-  statusCode: 500,
-  message: '%s server error, status=%d'
+  type: 'server.5xx.error',
+  message: '{title} server error, status={statusCode}'
 })
 var ClientError = TypedError({
-  type: 'client.400.error',
-  statusCode: 400,
-  message: '%s client error, status=%d'
+  type: 'client.4xx.error',
+  message: '{title} client error, status={statusCode}'
 })
 
-var error = ServerError('some title', 500)
-var error2 = ClientError('some title', 400)
+var error = ServerError({
+  title:'some title', 
+  statusCode: 500
+})
+var error2 = ClientError({
+  title: 'some title', 
+  statusCode: 404
+})
 ```
 
 ## Installation
