@@ -1,5 +1,5 @@
 type OptionError<T> := {
-    option?: T,
+    option: T | null,
     message: String,
     type: "OptionError"
 }
@@ -16,8 +16,10 @@ type ValidationError := {
 }
 
 error/option := (String, T) => OptionError<T>
-error/typed := ({
+
+error/typed := (args: {
     message: String,
     type: String
-}) => (...args: Any) => TypedError<String>
+}) => (opts: Object) => TypedError<String>
+
 error/validation := (Array<Error>) => ValidationError
