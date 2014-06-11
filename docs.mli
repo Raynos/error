@@ -19,7 +19,8 @@ error/option := (String, T) => OptionError<T>
 
 error/typed := (args: {
     message: String,
-    type: String
+    type: String,
+    name?: String
 }) => (opts: Object) => TypedError<String>
 
 error/validation := (Array<Error>) => ValidationError

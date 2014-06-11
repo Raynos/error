@@ -17,8 +17,10 @@
     "email": "raynos2@gmail.com"
   },
   "dependencies": {
-    "xtend": "~2.1.1",
-    "string-template": "~0.1.3"
+    "assert": "^1.1.1",
+    "camelize": "^0.1.2",
+    "string-template": "~0.1.3",
+    "xtend": "~2.1.1"
   },
   "devDependencies": {
     "tape": "~1.0.2"

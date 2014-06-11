@@ -1,10 +1,21 @@
+var assert = require("assert/")
+var camelize = require("camelize")
 var template = require("string-template")
 var extend = require("xtend/mutable")
 
 module.exports = TypedError
 
 function TypedError(args) {
+    assert(args, "args is required");
+    assert(args.type, "args.type is required")
+    assert(args.message, "args.message is required")
+
     var message = args.message
+
+    if (args.type && !args.name) {
+        var errorName = camelize(args.type) + "Error"
+        args.name = errorName[0].toUpperCase() + errorName.substr(1)
+    }
 
     return function createError(opts) {
         var result = new Error()
