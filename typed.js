@@ -17,7 +17,12 @@ function TypedError(args) {
         args.name = errorName[0].toUpperCase() + errorName.substr(1)
     }
 
-    return function createError(opts) {
+    createError.type = args.type;
+    createError.name = args.name;
+
+    return createError;
+
+    function createError(opts) {
         var result = new Error()
 
         Object.defineProperty(result, "type", {
