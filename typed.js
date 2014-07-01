@@ -18,7 +18,7 @@ function TypedError(args) {
     }
 
     createError.type = args.type;
-    createError.name = args.name;
+    createError._name = args.name;
 
     return createError;
 
