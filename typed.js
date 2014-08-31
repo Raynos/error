@@ -1,4 +1,3 @@
-var assert = require("assert/")
 var camelize = require("camelize")
 var template = require("string-template")
 var extend = require("xtend/mutable")
@@ -6,9 +5,15 @@ var extend = require("xtend/mutable")
 module.exports = TypedError
 
 function TypedError(args) {
-    assert(args, "args is required");
-    assert(args.type, "args.type is required")
-    assert(args.message, "args.message is required")
+    if (!args) {
+        throw new Error("args is required");
+    }
+    if (!args.type) {
+        throw new Error("args.type is required");
+    }
+    if (!args.message) {
+        throw new Error("args.message is required");
+    }
 
     var message = args.message
 
