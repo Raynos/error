@@ -22,7 +22,7 @@ function TypedError(args) {
         args.name = errorName[0].toUpperCase() + errorName.substr(1)
     }
 
-    createError.type = args.type;
+    extend(createError, args);
     createError._name = args.name;
 
     return createError;
