@@ -39,7 +39,7 @@ function TypedError(args) {
         extend(result, options)
         if (opts && opts.message) {
             result.message = template(opts.message, options)
-        } else {
+        } else if (message) {
             result.message = template(message, options)
         }
 
