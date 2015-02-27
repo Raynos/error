@@ -11,9 +11,6 @@ function TypedError(args) {
     if (!args.type) {
         throw new Error("args.type is required");
     }
-    if (!args.message) {
-        throw new Error("args.message is required");
-    }
 
     var message = args.message
 
