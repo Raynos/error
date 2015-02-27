@@ -40,7 +40,11 @@ function TypedError(args) {
         var options = extend({}, args, opts)
 
         extend(result, options)
-        result.message = template(message, options)
+        if (opts.message) {
+            result.message = template(opts.message, options)
+        } else {
+            result.message = template(message, options)
+        }
 
         return result
     }
