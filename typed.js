@@ -1,22 +1,24 @@
-var camelize = require("camelize")
-var template = require("string-template")
-var extend = require("xtend/mutable")
+'use strict';
 
-module.exports = TypedError
+var camelize = require('camelize');
+var template = require('string-template');
+var extend = require('xtend/mutable');
+
+module.exports = TypedError;
 
 function TypedError(args) {
     if (!args) {
-        throw new Error("args is required");
+        throw new Error('args is required');
     }
     if (!args.type) {
-        throw new Error("args.type is required");
+        throw new Error('args.type is required');
     }
 
-    var message = args.message
+    var message = args.message;
 
     if (args.type && !args.name) {
-        var errorName = camelize(args.type) + "Error"
-        args.name = errorName[0].toUpperCase() + errorName.substr(1)
+        var errorName = camelize(args.type) + 'Error';
+        args.name = errorName[0].toUpperCase() + errorName.substr(1);
     }
 
     extend(createError, args);
@@ -25,25 +27,24 @@ function TypedError(args) {
     return createError;
 
     function createError(opts) {
-        var result = new Error()
+        var result = new Error();
 
-        Object.defineProperty(result, "type", {
+        Object.defineProperty(result, 'type', {
             value: result.type,
             enumerable: true,
             writable: true,
             configurable: true
-        })
+        });
 
-        var options = extend({}, args, opts)
+        var options = extend({}, args, opts);
 
-        extend(result, options)
+        extend(result, options);
         if (opts && opts.message) {
-            result.message = template(opts.message, options)
+            result.message = template(opts.message, options);
         } else if (message) {
-            result.message = template(message, options)
+            result.message = template(message, options);
         }
 
-        return result
+        return result;
     }
 }
-

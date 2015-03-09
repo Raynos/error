@@ -12,49 +12,61 @@
 
 Custom errors
 
-## Example
-
-```js
-var ValidationError = require("error/validation")
-var OptionError = require("error/option")
-
-var error = ValidationError([{
-  message: "Please enter required field",
-  attribute: "name"
-}, {
-  message: "Password must be at least 10 characters",
-  attribute: "password"
-}])
-
-console.log("error.errors", error.errors)
-
-var error = OptionError("Something went wrong", metaData)
-
-console.log("error.option", error.option)
-```
-
 ## Typed Error
 
 ```js
 var TypedError = require("error/typed")
 
 var ServerError = TypedError({
-  type: 'server.5xx.error',
-  message: '{title} server error, status={statusCode}'
-})
+    type: 'server.5xx',
+    message: '{title} server error, status={statusCode}',
+    title: null,
+    statusCode: null
+});
 var ClientError = TypedError({
-  type: 'client.4xx.error',
-  message: '{title} client error, status={statusCode}'
-})
+    type: 'client.4xx',
+    message: '{title} client error, status={statusCode}',
+    title: null,
+    statusCode: null
+});
 
 var error = ServerError({
-  title:'some title', 
-  statusCode: 500
-})
+    title:'some title',
+    statusCode: 500
+});
 var error2 = ClientError({
-  title: 'some title', 
-  statusCode: 404
-})
+    title: 'some title',
+    statusCode: 404
+});
+```
+
+## Wrapped Errors
+
+```js
+var net = require('net');
+var WrappedError = require('error/wrapped');
+
+var ServerListenError = WrappedError({
+    message: 'server: {origMessage}',
+    type: 'server.listen-failed',
+    requestedPort: null,
+    host: null
+});
+
+var server = net.createServer();
+
+server.on('error', function onError(err) {
+    if (err.code === 'EADDRINUSE') {
+        throw ServerListenError(err, {
+            requestedPort: 3000,
+            host: null
+        });
+    } else {
+        throw err;
+    }
+});
+
+server.listen(3000);
 ```
 
 ## Installation
