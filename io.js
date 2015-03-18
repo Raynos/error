@@ -2,8 +2,8 @@
 
 module.exports = IOError;
 
-function IOError(originalError, prefix) {
-    var err = new Error(prefix + ': ' + originalError.message);
+function IOError(cause, prefix) {
+    var err = new Error(prefix + ': ' + cause.message);
 
     Object.defineProperty(err, 'type', {
         value: 'error.IOError',
@@ -12,8 +12,8 @@ function IOError(originalError, prefix) {
     });
     err.name = 'WrappedIOError';
     err.statusCode = 500;
-    Object.defineProperty(err, 'original', {
-        value: originalError,
+    Object.defineProperty(err, 'cause', {
+        value: cause,
         configurable: true,
         enumerable: false
     });
