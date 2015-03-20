@@ -17,6 +17,8 @@ function WrappedError(options) {
         'WrappedError: cause field is reserved');
     assert(!has(options, 'causeMessage'),
         'WrappedError: causeMessage field is reserved');
+    assert(!has(options, 'origMessage'),
+        'WrappedError: origMessage field is reserved');
 
     var createTypedError = TypedError(options);
 
@@ -28,7 +30,8 @@ function WrappedError(options) {
             'WrappedError: first argument must be an error');
 
         var err = createTypedError(extend(opts, {
-            causeMessage: cause.message
+            causeMessage: cause.message,
+            origMessage: cause.message
         }));
 
         if (has(cause, 'code') && !has(err, 'code')) {
