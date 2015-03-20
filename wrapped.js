@@ -15,6 +15,8 @@ function WrappedError(options) {
 
     assert(!has(options, 'cause'),
         'WrappedError: cause field is reserved');
+    assert(!has(options, 'fullType'),
+        'WrappedError: fullType field is reserved');
     assert(!has(options, 'causeMessage'),
         'WrappedError: causeMessage field is reserved');
     assert(!has(options, 'origMessage'),
@@ -25,6 +27,7 @@ function WrappedError(options) {
     return createError;
 
     function createError(cause, opts) {
+        /*eslint max-statements: [2, 25]*/
         assert(cause, 'an error is required');
         assert(isError(cause),
             'WrappedError: first argument must be an error');
@@ -34,16 +37,20 @@ function WrappedError(options) {
             origMessage: cause.message
         }));
 
+        var nodeCause = false;
+
         if (has(cause, 'code') && !has(err, 'code')) {
             err.code = cause.code;
         }
 
         if (has(cause, 'errno') && !has(err, 'errno')) {
             err.errno = cause.errno;
+            nodeCause = true;
         }
 
         if (has(cause, 'syscall') && !has(err, 'syscall')) {
             err.syscall = cause.syscall;
+            nodeCause = true;
         }
 
         Object.defineProperty(err, 'cause', {
@@ -51,6 +58,18 @@ function WrappedError(options) {
             configurable: true,
             enumerable: false
         });
+
+        var causeType = err.cause.type;
+        if (!causeType && nodeCause) {
+            causeType = 'error.wrapped-io.' +
+                (err.syscall || 'unknown') + '.' +
+                (err.errno || 'unknown');
+        } else {
+            causeType = 'error.wrapped-unknown';
+        }
+
+        err.fullType = err.type + '~' +
+            (err.cause.type || causeType);
 
         return err;
     }

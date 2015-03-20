@@ -38,7 +38,9 @@ test('can create a wrapped error', function t(assert) {
         host: 'localhost',
         name: 'ServerListenFailedError',
         causeMessage: 'listen EADDRINUSE',
-        code: 'EADDRINUSE'
+        origMessage: 'listen EADDRINUSE',
+        code: 'EADDRINUSE',
+        fullType: 'server.listen-failed~error.wrapped-unknown'
     }));
 
     assert.end();
@@ -93,9 +95,11 @@ test('can wrap real IO errors', function t(assert) {
             host: 'localhost',
             name: 'ServerListenFailedError',
             causeMessage: 'listen EADDRINUSE',
+            origMessage: 'listen EADDRINUSE',
             code: 'EADDRINUSE',
             errno: 'EADDRINUSE',
-            syscall: 'listen'
+            syscall: 'listen',
+            fullType: 'server.listen-failed~error.wrapped-io.listen.EADDRINUSE'
         }));
 
         assert.end();
