@@ -68,7 +68,7 @@ function WrappedError(options) {
             causeType = 'error.wrapped-unknown';
         }
 
-        err.fullType = err.type + '~' +
+        err.fullType = err.type + '~!~' +
             (err.cause.type || causeType);
 
         return err;
