@@ -13,38 +13,38 @@ function WrappedError(options) {
     assert(options.type, 'WrappedError: must specify type');
     assert(options.message, 'WrappedError: must specify message');
 
-    assert(!has(options, 'original'),
-        'WrappedError: original field is reserved');
-    assert(!has(options, 'origMessage'),
-        'WrappedError: origMessage field is reserved');
+    assert(!has(options, 'cause'),
+        'WrappedError: cause field is reserved');
+    assert(!has(options, 'causeMessage'),
+        'WrappedError: causeMessage field is reserved');
 
     var createTypedError = TypedError(options);
 
     return createError;
 
-    function createError(originalError, opts) {
-        assert(originalError, 'an error is required');
-        assert(isError(originalError),
+    function createError(cause, opts) {
+        assert(cause, 'an error is required');
+        assert(isError(cause),
             'WrappedError: first argument must be an error');
 
         var err = createTypedError(extend(opts, {
-            origMessage: originalError.message
+            causeMessage: cause.message
         }));
 
-        if (has(originalError, 'code') && !has(err, 'code')) {
-            err.code = originalError.code;
+        if (has(cause, 'code') && !has(err, 'code')) {
+            err.code = cause.code;
         }
 
-        if (has(originalError, 'errno') && !has(err, 'errno')) {
-            err.errno = originalError.errno;
+        if (has(cause, 'errno') && !has(err, 'errno')) {
+            err.errno = cause.errno;
         }
 
-        if (has(originalError, 'syscall') && !has(err, 'syscall')) {
-            err.syscall = originalError.syscall;
+        if (has(cause, 'syscall') && !has(err, 'syscall')) {
+            err.syscall = cause.syscall;
         }
 
-        Object.defineProperty(err, 'original', {
-            value: originalError,
+        Object.defineProperty(err, 'cause', {
+            value: cause,
             configurable: true,
             enumerable: false
         });

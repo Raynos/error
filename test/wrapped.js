@@ -7,7 +7,7 @@ var WrappedError = require('../wrapped.js');
 
 test('can create a wrapped error', function t(assert) {
     var ServerListenError = WrappedError({
-        message: 'server: {origMessage}',
+        message: 'server: {causeMessage}',
         type: 'server.listen-failed',
         requestedPort: null,
         host: null
@@ -26,7 +26,7 @@ test('can create a wrapped error', function t(assert) {
     assert.equal(err2.host, 'localhost');
     assert.equal(err2.code, 'EADDRINUSE');
 
-    assert.equal(err2.original, err);
+    assert.equal(err2.cause, err);
 
     assert.equal(err2.toString(),
         'ServerListenFailedError: server: listen EADDRINUSE');
@@ -37,7 +37,7 @@ test('can create a wrapped error', function t(assert) {
         requestedPort: 3426,
         host: 'localhost',
         name: 'ServerListenFailedError',
-        origMessage: 'listen EADDRINUSE',
+        causeMessage: 'listen EADDRINUSE',
         code: 'EADDRINUSE'
     }));
 
@@ -46,7 +46,7 @@ test('can create a wrapped error', function t(assert) {
 
 test('can wrap real IO errors', function t(assert) {
     var ServerListenError = WrappedError({
-        message: 'server: {origMessage}',
+        message: 'server: {causeMessage}',
         type: 'server.listen-failed',
         requestedPort: null,
         host: null
@@ -64,24 +64,24 @@ test('can wrap real IO errors', function t(assert) {
 
         server.listen(port);
 
-        function onError(originalError) {
-            var err = ServerListenError(originalError, {
+        function onError(cause) {
+            var err = ServerListenError(cause, {
                 host: 'localhost',
                 requestedPort: port
             });
 
             otherServer.close();
-            assertOnError(err, originalError, port);
+            assertOnError(err, cause, port);
         }
     }
 
-    function assertOnError(err, originalError, port) {
+    function assertOnError(err, cause, port) {
         assert.equal(err.message, 'server: listen EADDRINUSE');
         assert.equal(err.requestedPort, port);
         assert.equal(err.host, 'localhost');
         assert.equal(err.code, 'EADDRINUSE');
 
-        assert.equal(err.original, originalError);
+        assert.equal(err.cause, cause);
 
         assert.equal(err.toString(),
             'ServerListenFailedError: server: listen EADDRINUSE');
@@ -92,7 +92,7 @@ test('can wrap real IO errors', function t(assert) {
             requestedPort: port,
             host: 'localhost',
             name: 'ServerListenFailedError',
-            origMessage: 'listen EADDRINUSE',
+            causeMessage: 'listen EADDRINUSE',
             code: 'EADDRINUSE',
             errno: 'EADDRINUSE',
             syscall: 'listen'
