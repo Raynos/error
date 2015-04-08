@@ -1,6 +1,6 @@
 {
   "name": "error",
-  "version": "6.0.0",
+  "version": "6.0.0-npm-experiment1",
   "description": "Custom errors",
   "keywords": [],
   "author": "Raynos <raynos2@gmail.com>",
