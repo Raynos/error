@@ -1,6 +1,6 @@
 {
   "name": "error",
-  "version": "6.0.0-experiment2",
+  "version": "6.0.0-experiment3",
   "description": "Custom errors",
   "keywords": [],
   "author": "Raynos <raynos2@gmail.com>",
@@ -22,7 +22,12 @@
     "string-template": "~0.2.0",
     "xtend": "~4.0.0"
   },
-  "bundledDependencies": ["camelize", "is-error", "string-template", "xtend"],
+  "bundledDependencies": [
+    "camelize",
+    "is-error",
+    "string-template",
+    "xtend"
+  ],
   "devDependencies": {
     "lint-trap": "^1.0.1",
     "tape": "^3.5.0"
