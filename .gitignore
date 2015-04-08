@@ -12,5 +12,10 @@ bin/*.json
 build
 compile
 .lock-wscript
-node_modules
 coverage
+
+node_modules/*
+!node_modules/camelize
+!node_modules/xtend
+!node_modules/is-error
+!node_modules/string-template
