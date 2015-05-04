@@ -32,45 +32,45 @@ function WrappedError(options) {
         assert(isError(cause),
             'WrappedError: first argument must be an error');
 
-        var err = createTypedError(extend(opts, {
+        var nodeCause = false;
+        var errOptions = extend(opts, {
             causeMessage: cause.message,
             origMessage: cause.message
-        }));
+        });
 
-        var nodeCause = false;
-
-        if (has(cause, 'code') && !has(err, 'code')) {
-            err.code = cause.code;
+        if (has(cause, 'code') && !has(errOptions, 'code')) {
+            errOptions.code = cause.code;
         }
 
-        if (has(cause, 'errno') && !has(err, 'errno')) {
-            err.errno = cause.errno;
+        if (has(cause, 'errno') && !has(errOptions, 'errno')) {
+            errOptions.errno = cause.errno;
             nodeCause = true;
         }
 
-        if (has(cause, 'syscall') && !has(err, 'syscall')) {
-            err.syscall = cause.syscall;
+        if (has(cause, 'syscall') && !has(errOptions, 'syscall')) {
+            errOptions.syscall = cause.syscall;
             nodeCause = true;
         }
+
+        var causeType = cause.type;
+        if (!causeType && nodeCause) {
+            causeType = 'error.wrapped-io.' +
+                (cause.syscall || 'unknown') + '.' +
+                (cause.errno || 'unknown');
+        } else {
+            causeType = 'error.wrapped-unknown';
+        }
+
+        errOptions.fullType = options.type + '~!~' +
+            (cause.type || causeType);
+
+        var err = createTypedError(errOptions);
 
         Object.defineProperty(err, 'cause', {
             value: cause,
             configurable: true,
             enumerable: false
         });
-
-        var causeType = err.cause.type;
-        if (!causeType && nodeCause) {
-            causeType = 'error.wrapped-io.' +
-                (err.syscall || 'unknown') + '.' +
-                (err.errno || 'unknown');
-        } else {
-            causeType = 'error.wrapped-unknown';
-        }
-
-        err.fullType = err.type + '~!~' +
-            (err.cause.type || causeType);
-
         return err;
     }
 }

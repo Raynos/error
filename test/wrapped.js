@@ -46,6 +46,28 @@ test('can create a wrapped error', function t(assert) {
     assert.end();
 });
 
+test('can create wrapped error with syscall', function t(assert) {
+    var SysCallError = WrappedError({
+        'message': 'tchannel socket error ({code} from ' +
+            '{syscall}): {origMessage}',
+        type: 'syscall.error'
+    });
+
+    var err = new Error('listen EADDRINUSE');
+    err.code = 'EADDRINUSE';
+    err.syscall = 'listen';
+
+    var err2 = SysCallError(err);
+
+    assert.equal(err2.message, 'tchannel socket error ' +
+        '(EADDRINUSE from listen): listen EADDRINUSE');
+    assert.equal(err2.syscall, 'listen');
+    assert.equal(err2.code, 'EADDRINUSE');
+    assert.equal(err2.type, 'syscall.error');
+
+    assert.end();
+});
+
 test('can wrap real IO errors', function t(assert) {
     var ServerListenError = WrappedError({
         message: 'server: {causeMessage}',
