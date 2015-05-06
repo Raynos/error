@@ -1,10 +1,12 @@
 'use strict';
 
 var extend = require('xtend');
-var isError = require('is-error');
 var assert = require('assert');
 
 var TypedError = require('./typed.js');
+
+var objectToString = Object.prototype.toString;
+var ERROR_TYPE = '[object Error]';
 
 module.exports = WrappedError;
 
@@ -55,4 +57,8 @@ function WrappedError(options) {
 
 function has(obj, key) {
     return Object.prototype.hasOwnProperty.call(obj, key);
+}
+
+function isError(err) {
+    return objectToString.call(err) === ERROR_TYPE;
 }
