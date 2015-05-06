@@ -1,8 +1,9 @@
 'use strict';
 
-var camelize = require('camelize');
 var template = require('string-template');
 var extend = require('xtend/mutable');
+
+var isWordBoundary = /[_.-](\w|$)/g;
 
 module.exports = TypedError;
 
@@ -17,7 +18,7 @@ function TypedError(args) {
     var message = args.message;
 
     if (args.type && !args.name) {
-        var errorName = camelize(args.type) + 'Error';
+        var errorName = camelCase(args.type) + 'Error';
         args.name = errorName[0].toUpperCase() + errorName.substr(1);
     }
 
@@ -47,4 +48,12 @@ function TypedError(args) {
 
         return result;
     }
+}
+
+function camelCase(str) {
+    return str.replace(isWordBoundary, upperCase);
+}
+
+function upperCase(_, x) {
+    return x.toUpperCase();
 }

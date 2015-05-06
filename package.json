@@ -17,14 +17,13 @@
     "email": "raynos2@gmail.com"
   },
   "dependencies": {
-    "camelize": "^1.0.0",
-    "is-error": "^2.0.0",
-    "string-template": "~0.2.0",
+    "string-template": "~0.2.1",
     "xtend": "~4.0.0"
   },
   "devDependencies": {
-    "lint-trap": "^1.0.1",
-    "tape": "^3.5.0"
+    "istanbul": "0.3.13",
+    "tape": "^3.5.0",
+    "uber-standard": "3.6.4"
   },
   "licenses": [
     {
@@ -33,7 +32,7 @@
     }
   ],
   "scripts": {
-    "lint": "lint-trap .",
+    "lint": "standard -v .",
     "test": "npm run lint && node test/index.js",
     "travis-test": "istanbul cover ./test/index.js && ((cat coverage/lcov.info | coveralls) || exit 0)",
     "cover": "istanbul cover --report none --print detail ./test/index.js",
