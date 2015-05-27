@@ -103,6 +103,21 @@ test('wrapping twice', function t(assert) {
     assert.end();
 });
 
+test('handles bad recursive strings', function t(assert) {
+    var ReadError = WrappedError({
+        type: 'wat.wat',
+        message: 'read: {causeMessage}'
+    });
+
+    var err2 = ReadError(new Error('hi {causeMessage}'));
+
+    assert.ok(err2);
+    assert.equal(err2.message,
+        'read: hi $INVALID_CAUSE_MESSAGE_LITERAL');
+
+    assert.end();
+});
+
 test('can wrap real IO errors', function t(assert) {
     var ServerListenError = WrappedError({
         message: 'server: {causeMessage}',

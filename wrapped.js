@@ -7,6 +7,8 @@ var TypedError = require('./typed.js');
 
 var objectToString = Object.prototype.toString;
 var ERROR_TYPE = '[object Error]';
+var causeMessageRegex = /\{causeMessage\}/g;
+var origMessageRegex = /\{origMessage\}/g;
 
 module.exports = WrappedError;
 
@@ -34,10 +36,25 @@ function WrappedError(options) {
         assert(isError(cause),
             'WrappedError: first argument must be an error');
 
+        var causeMessage = cause.message;
+        if (causeMessage.indexOf('{causeMessage}') >= 0) {
+            // recover
+            causeMessage = causeMessage.replace(
+                causeMessageRegex,
+                '$INVALID_CAUSE_MESSAGE_LITERAL'
+            );
+        }
+        if (causeMessage.indexOf('{origMessage}') >= 0) {
+            causeMessage = causeMessage.replace(
+                origMessageRegex,
+                '$INVALID_ORIG_MESSAGE_LITERAL'
+            );
+        }
+
         var nodeCause = false;
         var errOptions = extend(opts, {
-            causeMessage: cause.message,
-            origMessage: cause.message
+            causeMessage: causeMessage,
+            origMessage: causeMessage
         });
 
         if (has(cause, 'code') && !has(errOptions, 'code')) {
