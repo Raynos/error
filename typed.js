@@ -37,10 +37,10 @@ function TypedError(args) {
             configurable: true
         });
 
-        if (!opts.fullType) {
-            opts.fullType = args.type;
-        }
         var options = extend({}, args, opts);
+        if (!options.fullType) {
+            options.fullType = args.type;
+        }
 
         extend(result, options);
         if (opts && opts.message) {
