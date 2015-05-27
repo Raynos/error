@@ -15,6 +15,8 @@ test('a server error', function t(assert) {
         statusCode: 500
     });
 
+    assert.equal(ServerError.type, 'server.5xx.error');
+
     assert.equal(error.type, 'server.5xx.error');
     assert.equal(error.fullType, 'server.5xx.error');
     assert.equal(error.statusCode, 500);

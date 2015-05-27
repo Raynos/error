@@ -21,6 +21,8 @@ test('can create a wrapped error', function t(assert) {
         host: 'localhost'
     });
 
+    assert.equal(ServerListenError.type, 'server.listen-failed');
+
     assert.equal(err2.message, 'server: listen EADDRINUSE');
     assert.equal(err2.requestedPort, 3426);
     assert.equal(err2.host, 'localhost');
