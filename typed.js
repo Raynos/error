@@ -13,8 +13,10 @@ function TypedError(args) {
     assert(args.type, 'TypedError: must specify options.type');
     assert(args.message, 'TypedError: must specify options.message');
 
-    var message = args.message;
+    assert(!has(args, 'fullType'),
+        'TypedError: fullType field is reserved');
 
+    var message = args.message;
     if (args.type && !args.name) {
         var errorName = camelCase(args.type) + 'Error';
         args.name = errorName[0].toUpperCase() + errorName.substr(1);
@@ -35,6 +37,9 @@ function TypedError(args) {
             configurable: true
         });
 
+        if (!opts.fullType) {
+            opts.fullType = args.type;
+        }
         var options = extend({}, args, opts);
 
         extend(result, options);
