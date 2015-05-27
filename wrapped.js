@@ -64,7 +64,7 @@ function WrappedError(options) {
         }
 
         errOptions.fullType = options.type + '~!~' +
-            (cause.type || causeType);
+            (cause.fullType || cause.type || causeType);
 
         var err = createTypedError(errOptions);
 

@@ -68,6 +68,41 @@ test('can create wrapped error with syscall', function t(assert) {
     assert.end();
 });
 
+test('wrapping twice', function t(assert) {
+    var ReadError = WrappedError({
+        type: 'my.read-error',
+        message: 'read: {causeMessage}'
+    });
+
+    var DatabaseError = WrappedError({
+        type: 'my.database-error',
+        message: 'db: {causeMessage}'
+    });
+
+    var BusinessError = WrappedError({
+        type: 'my.business-error',
+        message: 'business: {causeMessage}'
+    });
+
+    var err = BusinessError(
+        DatabaseError(
+            ReadError(
+                new Error('oops')
+            )
+        )
+    );
+    assert.ok(err);
+
+    assert.equal(err.message, 'business: db: read: oops');
+    assert.equal(err.type, 'my.business-error');
+    assert.equal(err.fullType, 'my.business-error~!~' +
+        'my.database-error~!~' +
+        'my.read-error~!~' +
+        'error.wrapped-unknown');
+
+    assert.end();
+});
+
 test('can wrap real IO errors', function t(assert) {
     var ServerListenError = WrappedError({
         message: 'server: {causeMessage}',
