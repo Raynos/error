@@ -2,18 +2,16 @@
 
 var template = require('string-template');
 var extend = require('xtend/mutable');
+var assert = require('assert');
 
 var isWordBoundary = /[_.-](\w|$)/g;
 
 module.exports = TypedError;
 
 function TypedError(args) {
-    if (!args) {
-        throw new Error('args is required');
-    }
-    if (!args.type) {
-        throw new Error('args.type is required');
-    }
+    assert(args, 'TypedError: must specify options');
+    assert(args.type, 'TypedError: must specify options.type');
+    assert(args.message, 'TypedError: must specify options.message');
 
     assert(!has(args, 'fullType'),
         'TypedError: fullType field is reserved');
@@ -61,4 +59,8 @@ function camelCase(str) {
 
 function upperCase(_, x) {
     return x.toUpperCase();
+}
+
+function has(obj, key) {
+    return Object.prototype.hasOwnProperty.call(obj, key);
 }
