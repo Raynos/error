@@ -2,6 +2,7 @@
 
 var template = require('string-template');
 var extend = require('xtend/mutable');
+var assert = require('assert');
 
 var isWordBoundary = /[_.-](\w|$)/g;
 
@@ -62,3 +63,8 @@ function camelCase(str) {
 function upperCase(_, x) {
     return x.toUpperCase();
 }
+
+function has(obj, key) {
+    return Object.prototype.hasOwnProperty.call(obj, key);
+}
+
