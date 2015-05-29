@@ -39,7 +39,7 @@ function TypedError(args) {
 
         var options = extend({}, args, opts);
         if (!options.fullType) {
-            options.fullType = args.type;
+            options.fullType = options.type;
         }
 
         extend(result, options);
