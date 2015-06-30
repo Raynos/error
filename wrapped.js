@@ -2,6 +2,7 @@
 
 var extend = require('xtend/mutable');
 var assert = require('assert');
+var util = require('util');
 
 var TypedError = require('./typed.js');
 
@@ -101,5 +102,5 @@ function has(obj, key) {
 }
 
 function isError(err) {
-    return objectToString.call(err) === ERROR_TYPE;
+    return util.isError(err) || objectToString.call(err) === ERROR_TYPE;
 }
