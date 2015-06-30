@@ -180,3 +180,18 @@ test('can wrap real IO errors', function t(assert) {
         assert.end();
     }
 });
+
+test('can wrap assert errors', function t(assert) {
+  var TestError = WrappedError({
+      message: 'error: {origMessage}',
+      type: 'error'
+  });
+
+  var assertError;
+  try { require('assert').equal('a', 'b'); }
+  catch (_err) { assertError = _err; }
+
+  var err = TestError(assertError);
+  assert.equal(err.cause.actual, 'a');
+  assert.end();
+})
