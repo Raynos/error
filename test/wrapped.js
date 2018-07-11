@@ -152,7 +152,7 @@ test('can wrap real IO errors', function t(assert) {
     }
 
     function assertOnError(err, cause, port) {
-        assert.equal(err.message, 'server: listen EADDRINUSE');
+        assert.equal(err.message, 'server: listen EADDRINUSE :::'+port);
         assert.equal(err.requestedPort, port);
         assert.equal(err.host, 'localhost');
         assert.equal(err.code, 'EADDRINUSE');
@@ -160,16 +160,16 @@ test('can wrap real IO errors', function t(assert) {
         assert.equal(err.cause, cause);
 
         assert.equal(err.toString(),
-            'ServerListenFailedError: server: listen EADDRINUSE');
+            'ServerListenFailedError: server: listen EADDRINUSE :::'+port);
 
         assert.equal(JSON.stringify(err), JSON.stringify({
             type: 'server.listen-failed',
-            message: 'server: listen EADDRINUSE',
+            message: 'server: listen EADDRINUSE :::'+port,
             requestedPort: port,
             host: 'localhost',
             name: 'ServerListenFailedError',
-            causeMessage: 'listen EADDRINUSE',
-            origMessage: 'listen EADDRINUSE',
+            causeMessage: 'listen EADDRINUSE :::'+port,
+            origMessage: 'listen EADDRINUSE :::'+port,
             code: 'EADDRINUSE',
             errno: 'EADDRINUSE',
             syscall: 'listen',
