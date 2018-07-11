@@ -4,6 +4,7 @@ var extend = require('xtend/mutable');
 var assert = require('assert');
 var util = require('util');
 
+var { has, omitKey } = require('./util');
 var TypedError = require('./typed.js');
 
 var objectToString = Object.prototype.toString;
@@ -28,8 +29,10 @@ function WrappedError(options) {
         'WrappedError: origMessage field is reserved');
 
     var createTypedError = TypedError(options);
-    extend(createError, options);
+    extend(createError, omitKey(options, 'name'));
+
     createError._name = options.name;
+    Object.defineProperty(createError, 'name', { value: options.name, configurable: true });
 
     return createError;
 
@@ -95,10 +98,6 @@ function WrappedError(options) {
         });
         return err;
     }
-}
-
-function has(obj, key) {
-    return Object.prototype.hasOwnProperty.call(obj, key);
 }
 
 function isError(err) {

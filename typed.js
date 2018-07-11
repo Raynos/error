@@ -4,6 +4,8 @@ var template = require('string-template');
 var extend = require('xtend/mutable');
 var assert = require('assert');
 
+var { has, omitKey } = require('./util');
+
 var isWordBoundary = /[_.-](\w|$)/g;
 
 module.exports = TypedError;
@@ -22,8 +24,9 @@ function TypedError(args) {
         args.name = errorName[0].toUpperCase() + errorName.substr(1);
     }
 
-    extend(createError, args);
+    extend(createError, omitKey(args, 'name'));
     createError._name = args.name;
+    Object.defineProperty(createError, 'name', { value: args.name, configurable: true });
 
     return createError;
 
@@ -59,8 +62,4 @@ function camelCase(str) {
 
 function upperCase(_, x) {
     return x.toUpperCase();
-}
-
-function has(obj, key) {
-    return Object.prototype.hasOwnProperty.call(obj, key);
 }
