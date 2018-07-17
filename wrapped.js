@@ -4,7 +4,7 @@ var extend = require('xtend/mutable');
 var assert = require('assert');
 var util = require('util');
 
-var { has, omitKey } = require('./util');
+var _util = require('./util'), has = _util.has, omitKey = _util.omitKey;
 var TypedError = require('./typed.js');
 
 var objectToString = Object.prototype.toString;

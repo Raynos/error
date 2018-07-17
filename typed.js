@@ -4,7 +4,7 @@ var template = require('string-template');
 var extend = require('xtend/mutable');
 var assert = require('assert');
 
-var { has, omitKey } = require('./util');
+var _util = require('./util'), has = _util.has, omitKey = _util.omitKey;
 
 var isWordBoundary = /[_.-](\w|$)/g;
 
