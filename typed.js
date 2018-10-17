@@ -1,7 +1,6 @@
 'use strict';
 
 var template = require('string-template');
-var extend = require('xtend/mutable');
 var assert = require('assert');
 
 var _util = require('./util'), has = _util.has, omitKey = _util.omitKey;
@@ -24,7 +23,7 @@ function TypedError(args) {
         args.name = errorName[0].toUpperCase() + errorName.substr(1);
     }
 
-    extend(createError, omitKey(args, 'name'));
+    Object.assign(createError, omitKey(args, 'name'));
     createError._name = args.name;
     Object.defineProperty(createError, 'name', { value: args.name, configurable: true });
 
@@ -40,12 +39,12 @@ function TypedError(args) {
             configurable: true
         });
 
-        var options = extend({}, args, opts);
+        var options = Object.assign({}, args, opts);
         if (!options.fullType) {
             options.fullType = options.type;
         }
 
-        extend(result, options);
+        Object.assign(result, options);
         if (opts && opts.message) {
             result.message = template(opts.message, options);
         } else if (message) {

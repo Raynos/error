@@ -1,6 +1,5 @@
 'use strict';
 
-var extend = require('xtend/mutable');
 var assert = require('assert');
 var util = require('util');
 
@@ -29,7 +28,7 @@ function WrappedError(options) {
         'WrappedError: origMessage field is reserved');
 
     var createTypedError = TypedError(options);
-    extend(createError, omitKey(options, 'name'));
+    Object.assign(createError, omitKey(options, 'name'));
 
     createError._name = options.name;
     Object.defineProperty(createError, 'name', { value: options.name, configurable: true });
@@ -58,7 +57,7 @@ function WrappedError(options) {
         }
 
         var nodeCause = false;
-        var errOptions = extend({}, opts, {
+        var errOptions = Object.assign({}, opts, {
             causeMessage: causeMessage,
             origMessage: causeMessage
         });
