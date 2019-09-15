@@ -27,6 +27,23 @@ test('a server error', function t(assert) {
     assert.end();
 });
 
+test('null fields', function t(assert) {
+    var NullError = TypedError({
+        type: 'myError',
+        message: 'myError',
+        length: null,
+        buffer: null,
+        state: null,
+        expecting: null
+    })
+
+    var e = NullError()
+    assert.equal(e.type, 'myError')
+    assert.equal(NullError.type, 'myError')
+
+    assert.end()
+})
+
 test('a client error', function t(assert) {
     var ClientError = TypedError({
         type: 'client.4xx.error',

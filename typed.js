@@ -6,6 +6,8 @@ var assert = require('assert');
 var hasOwnProperty = Object.prototype.hasOwnProperty;
 var isWordBoundary = /[_.-](\w|$)/g;
 
+var FUNCTION_FIELD_WHITELIST = Object.getOwnPropertyNames(TypedError)
+
 module.exports = TypedError;
 
 function TypedError(args) {
@@ -21,11 +23,15 @@ function TypedError(args) {
     if (!funcName) {
         var errorName = camelCase(args.type) + 'Error';
         funcName = errorName[0].toUpperCase() + errorName.substr(1);
-    } else {
-        delete args.name
     }
 
-    extend(createError, args);
+    var copyArgs = {}
+    extend(copyArgs, args)
+    for (var i = 0; i < FUNCTION_FIELD_WHITELIST.length; i++) {
+        delete copyArgs[FUNCTION_FIELD_WHITELIST[i]]
+    }
+
+    extend(createError, copyArgs);
     createError._name = funcName;
 
     return createError;
