@@ -47,3 +47,18 @@ test('a client error', function t(assert) {
 
     assert.end();
 });
+
+test('check specific "length" field', (assert) => {
+    var ServerError = TypedError({
+        type: 'myError',
+        message: 'myError',
+        length: null,
+    });
+
+    var error = ServerError();
+
+    assert.equal(ServerError.type, 'myError');
+    assert.equal(error.type, 'myError');
+
+    assert.end();
+});

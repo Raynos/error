@@ -1,9 +1,9 @@
 'use strict';
 
 var template = require('string-template');
+var extend = require('./extend');
 var assert = require('assert');
 
-var hasOwnProperty = Object.prototype.hasOwnProperty;
 var isWordBoundary = /[_.-](\w|$)/g;
 
 module.exports = TypedError;
@@ -56,14 +56,6 @@ function TypedError(args) {
         }
 
         return result;
-    }
-}
-
-function extend(target, source) {
-    for (var key in source) {
-        if (hasOwnProperty.call(source, key)) {
-            target[key] = source[key]
-        }
     }
 }
 

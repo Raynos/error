@@ -1,6 +1,7 @@
 'use strict';
 
 var assert = require('assert');
+var extend = require('./extend');
 var util = require('util');
 
 var TypedError = require('./typed.js');
@@ -9,7 +10,6 @@ var objectToString = Object.prototype.toString;
 var ERROR_TYPE = '[object Error]';
 var causeMessageRegex = /\{causeMessage\}/g;
 var origMessageRegex = /\{origMessage\}/g;
-var hasOwnProperty = Object.prototype.hasOwnProperty;
 
 module.exports = WrappedError;
 
@@ -105,12 +105,4 @@ function has(obj, key) {
 
 function isError(err) {
     return util.isError(err) || objectToString.call(err) === ERROR_TYPE;
-}
-
-function extend(target, source) {
-    for (var key in source) {
-        if (hasOwnProperty.call(source, key)) {
-            target[key] = source[key]
-        }
-    }
 }
