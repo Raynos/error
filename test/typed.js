@@ -21,6 +21,8 @@ test('a server error', function t(assert) {
     assert.equal(error.fullType, 'server.5xx.error');
     assert.equal(error.statusCode, 500);
     assert.equal(error.message, 'some title server error, status=500');
+    assert.equal(error.toString(),
+        'Server5xxErrorError: some title server error, status=500')
 
     assert.end();
 });
@@ -40,6 +42,8 @@ test('a client error', function t(assert) {
     assert.equal(error2.fullType, 'client.4xx.error');
     assert.equal(error2.statusCode, 404);
     assert.equal(error2.message, 'some title client error, status=404');
+    assert.equal(error2.toString(),
+        'Client4xxErrorError: some title client error, status=404')
 
     assert.end();
 });
