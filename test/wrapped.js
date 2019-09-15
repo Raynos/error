@@ -152,24 +152,32 @@ test('can wrap real IO errors', function t(assert) {
     }
 
     function assertOnError(err, cause, port) {
-        assert.equal(err.message, 'server: listen EADDRINUSE :::'+port);
+        assert.ok(err.message.indexOf('server: ') >= 0)
+        assert.ok(err.message.indexOf('listen EADDRINUSE') >= 0)
         assert.equal(err.requestedPort, port);
         assert.equal(err.host, 'localhost');
         assert.equal(err.code, 'EADDRINUSE');
 
         assert.equal(err.cause, cause);
 
-        assert.equal(err.toString(),
-            'ServerListenFailedError: server: listen EADDRINUSE :::'+port);
+        assert.ok(err.toString().indexOf('ServerListenFailedError: ') >= 0)
+        assert.ok(err.toString().indexOf('server: ') >= 0)
+        assert.ok(err.toString().indexOf('listen EADDRINUSE') >= 0)
+
+        var expectedMessage = err.message
+        var expectedOrigMessage = err.origMessage
+
+        assert.ok(err.origMessage.indexOf('listen EADDRINUSE') >= 0)
+        assert.ok(err.origMessage.indexOf('server: ') === -1)
 
         assert.equal(JSON.stringify(err), JSON.stringify({
             type: 'server.listen-failed',
-            message: 'server: listen EADDRINUSE :::'+port,
+            message: expectedMessage,
             requestedPort: port,
             host: 'localhost',
             name: 'ServerListenFailedError',
-            causeMessage: 'listen EADDRINUSE :::'+port,
-            origMessage: 'listen EADDRINUSE :::'+port,
+            causeMessage: expectedOrigMessage,
+            origMessage: expectedOrigMessage,
             code: 'EADDRINUSE',
             errno: 'EADDRINUSE',
             syscall: 'listen',
