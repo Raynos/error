@@ -1,9 +1,9 @@
 'use strict';
 
 var template = require('string-template');
-var extend = require('xtend/mutable');
 var assert = require('assert');
 
+var hasOwnProperty = Object.prototype.hasOwnProperty;
 var isWordBoundary = /[_.-](\w|$)/g;
 
 module.exports = TypedError;
@@ -17,13 +17,16 @@ function TypedError(args) {
         'TypedError: fullType field is reserved');
 
     var message = args.message;
-    if (args.type && !args.name) {
+    var funcName = args.name
+    if (!funcName) {
         var errorName = camelCase(args.type) + 'Error';
-        args.name = errorName[0].toUpperCase() + errorName.substr(1);
+        funcName = errorName[0].toUpperCase() + errorName.substr(1);
+    } else {
+        delete args.name
     }
 
     extend(createError, args);
-    createError._name = args.name;
+    createError._name = funcName;
 
     return createError;
 
@@ -37,11 +40,14 @@ function TypedError(args) {
             configurable: true
         });
 
-        var options = extend({}, args, opts);
+        var options = {}
+        extend(options, args)
+        extend(options, opts)
         if (!options.fullType) {
             options.fullType = options.type;
         }
 
+        result.name = funcName
         extend(result, options);
         if (opts && opts.message) {
             result.message = template(opts.message, options);
@@ -50,6 +56,14 @@ function TypedError(args) {
         }
 
         return result;
+    }
+}
+
+function extend(target, source) {
+    for (var key in source) {
+        if (hasOwnProperty.call(source, key)) {
+            target[key] = source[key]
+        }
     }
 }
 

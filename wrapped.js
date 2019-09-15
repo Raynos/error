@@ -1,6 +1,5 @@
 'use strict';
 
-var extend = require('xtend/mutable');
 var assert = require('assert');
 var util = require('util');
 
@@ -10,6 +9,7 @@ var objectToString = Object.prototype.toString;
 var ERROR_TYPE = '[object Error]';
 var causeMessageRegex = /\{causeMessage\}/g;
 var origMessageRegex = /\{origMessage\}/g;
+var hasOwnProperty = Object.prototype.hasOwnProperty;
 
 module.exports = WrappedError;
 
@@ -55,7 +55,9 @@ function WrappedError(options) {
         }
 
         var nodeCause = false;
-        var errOptions = extend({}, opts, {
+        var errOptions = {}
+        extend(errOptions, opts)
+        extend(errOptions, {
             causeMessage: causeMessage,
             origMessage: causeMessage
         });
@@ -103,4 +105,12 @@ function has(obj, key) {
 
 function isError(err) {
     return util.isError(err) || objectToString.call(err) === ERROR_TYPE;
+}
+
+function extend(target, source) {
+    for (var key in source) {
+        if (hasOwnProperty.call(source, key)) {
+            target[key] = source[key]
+        }
+    }
 }

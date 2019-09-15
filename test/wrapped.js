@@ -35,10 +35,10 @@ test('can create a wrapped error', function t(assert) {
 
     assert.equal(JSON.stringify(err2), JSON.stringify({
         type: 'server.listen-failed',
+        name: 'ServerListenFailedError',
         message: 'server: listen EADDRINUSE',
         requestedPort: 3426,
         host: 'localhost',
-        name: 'ServerListenFailedError',
         causeMessage: 'listen EADDRINUSE',
         origMessage: 'listen EADDRINUSE',
         code: 'EADDRINUSE',
@@ -172,10 +172,10 @@ test('can wrap real IO errors', function t(assert) {
 
         assert.equal(JSON.stringify(err), JSON.stringify({
             type: 'server.listen-failed',
+            name: 'ServerListenFailedError',
             message: expectedMessage,
             requestedPort: port,
             host: 'localhost',
-            name: 'ServerListenFailedError',
             causeMessage: expectedOrigMessage,
             origMessage: expectedOrigMessage,
             code: 'EADDRINUSE',
