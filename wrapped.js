@@ -11,6 +11,8 @@ var causeMessageRegex = /\{causeMessage\}/g;
 var origMessageRegex = /\{origMessage\}/g;
 var hasOwnProperty = Object.prototype.hasOwnProperty;
 
+var FUNCTION_FIELD_WHITELIST = Object.getOwnPropertyNames(WrappedError)
+
 module.exports = WrappedError;
 
 function WrappedError(options) {
@@ -27,8 +29,14 @@ function WrappedError(options) {
     assert(!has(options, 'origMessage'),
         'WrappedError: origMessage field is reserved');
 
+    var copyArgs = {}
+    extend(copyArgs, options)
+    for (var i = 0; i < FUNCTION_FIELD_WHITELIST.length; i++) {
+        delete copyArgs[FUNCTION_FIELD_WHITELIST[i]]
+    }
+
     var createTypedError = TypedError(options);
-    extend(createError, options);
+    extend(createError, copyArgs);
     createError._name = options.name;
 
     return createError;

@@ -7,6 +7,7 @@ var WrappedError = require('../wrapped.js');
 
 test('can create a wrapped error', function t(assert) {
     var ServerListenError = WrappedError({
+        name: 'SomeError',
         message: 'server: {causeMessage}',
         type: 'server.listen-failed',
         requestedPort: null,
