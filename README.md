@@ -77,9 +77,9 @@ function readFile(path, cb) {
 ## Structured errors
 
 ```js
-const { Serror } = require('error')
+const { SError } = require('error')
 
-class ServerError extends Serror {}
+class ServerError extends SError {}
 class ClientError extends SError {}
 
 const err = ServerError.create(
