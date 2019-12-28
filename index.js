@@ -271,6 +271,12 @@ function errorf (messageTmpl, info) {
 exports.errorf = errorf
 
 function createTypeStr (name) {
+  if (name === 'SError') {
+    return 'structured.error'
+  } else if (name === 'WError') {
+    return 'wrapped.error`'
+  }
+
   return name
     .replace(lowerCaseKebabRegex, '$1.$2')
     .replace(upperCaseKebabRegex, '$1.$2')
