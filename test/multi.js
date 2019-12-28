@@ -32,7 +32,7 @@ test('a MultiError', function t (assert) {
     errors: [{
       message: 'one error',
       type: 'structured.error',
-      name: 'SError'
+      name: 'StructuredError'
     }]
   }))
 
