@@ -165,7 +165,7 @@ class WError extends Error {
       WError.fullInfo(cause, info)
     )
     return new this(
-      msg + '\ncause: ' + cause.message,
+      msg + ': ' + cause.message,
       cause,
       info || null
     )
