@@ -347,6 +347,7 @@ constructor directly.
   [eris]: https://github.com/rotisserie/eris/tree/v0.1.0
   [pkg-errors]: https://github.com/pkg/errors
   [7.x]: https://github.com/Raynos/error/tree/v7.x
+  [dave]: https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully
   [string-template]: https://github.com/Matt-Esch/string-template
   [verror]: https://github.com/joyent/node-verror
   [ono]: https://github.com/JS-DevTools/ono
