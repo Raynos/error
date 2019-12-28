@@ -80,6 +80,23 @@ class WError extends Error {
     this.__cause = cause
   }
 
+  fullType () {
+    let causeType
+    if (typeof this.__cause.fullType === 'function') {
+      causeType = this.__cause.fullType()
+    } else if (this.__cause.type) {
+      causeType = this.__cause.type
+    } else if (this.__cause.errno || this.__cause.syscall) {
+      causeType = 'error.wrapped-io.' +
+        (this.__cause.syscall || 'unknown') + '.' +
+        (this.__cause.errno)
+    } else {
+      causeType = 'error.wrapped-unknown'
+    }
+
+    return this.type + '~!~' + causeType
+  }
+
   cause () {
     return this.__cause
   }
@@ -114,6 +131,7 @@ class WError extends Error {
       message: this.message,
       stack: this.stack,
       type: this.type,
+      fullType: this.fullType(),
       name: this.name,
       cause: causeJSON
     }
