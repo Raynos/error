@@ -32,7 +32,7 @@ class StructuredError extends Error {
     assert(typeof info === 'object')
 
     this.name = this.constructor.name
-    this.type = createTypeStr(this.name)
+    this.type = this.constructor.type
     this.__info = info
   }
 
@@ -55,7 +55,11 @@ class StructuredError extends Error {
   }
 
   static get type () {
-    return createTypeStr(this.name)
+    if (Object.prototype.hasOwnProperty.call(this, '__type')) {
+      return this.__type
+    }
+    this.__type = createTypeStr(this.name)
+    return this.__type
   }
 
   static create (messageTmpl, info) {
@@ -75,7 +79,7 @@ class WrappedError extends Error {
     assert(cause && isError(cause))
 
     this.name = this.constructor.name
-    this.type = createTypeStr(this.name)
+    this.type = this.constructor.type
     this.__info = info
     this.__cause = cause
   }
@@ -129,7 +133,11 @@ class WrappedError extends Error {
   }
 
   static get type () {
-    return createTypeStr(this.name)
+    if (Object.prototype.hasOwnProperty.call(this, '__type')) {
+      return this.__type
+    }
+    this.__type = createTypeStr(this.name)
+    return this.__type
   }
 
   static fullStack (err) {
