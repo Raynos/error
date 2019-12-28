@@ -256,6 +256,16 @@ function fullStack (err) {
 }
 exports.fullStack = fullStack
 
+function wrapf (messageTmpl, cause, info) {
+  return WError.wrap(messageTmpl, cause, info)
+}
+exports.wrapf = wrapf
+
+function errorf (messageTmpl, info) {
+  return SError.create(messageTmpl, info)
+}
+exports.errorf = errorf
+
 function createTypeStr (name) {
   return name
     .replace(lowerCaseKebabRegex, '$1.$2')
