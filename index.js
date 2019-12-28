@@ -201,7 +201,11 @@ class MultiError extends Error {
     let out = []
     for (const e of this.__errors) {
       if (typeof e.toJSON === 'function') {
-        out.push(e.toJSON())
+        const nestedJSON = e.toJSON()
+        if (nestedJSON.stack) {
+          delete nestedJSON.stack
+        }
+        out.push(nestedJSON)
       } else {
         out.push(getJSONForPlainError(e))
       }
