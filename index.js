@@ -102,20 +102,7 @@ class WError extends Error {
   }
 
   info () {
-    const c = this.cause()
-    let existing
-    if (c && typeof c.info === 'function') {
-      existing = c.info()
-    } else if (c) {
-      existing = getInfoForPlainError(c)
-    }
-
-    if (existing) {
-      Object.assign(existing, this.__info)
-      return existing
-    }
-
-    return { ...this.__info }
+    return WError.fullInfo(this.cause(), this.__info)
   }
 
   toJSON () {
@@ -149,10 +136,30 @@ class WError extends Error {
     return findCauseByName(err, name)
   }
 
+  static fullInfo (cause, info) {
+    let existing
+    if (cause && typeof cause.info === 'function') {
+      existing = cause.info()
+    } else if (cause) {
+      existing = getInfoForPlainError(cause)
+    }
+
+    if (existing) {
+      Object.assign(existing, info)
+      return existing
+    }
+
+    return { ...info }
+  }
+
   static wrap (messageTmpl, cause, info) {
     assert(typeof messageTmpl === 'string')
     assert(cause && isError(cause))
-    const msg = stringTemplate(messageTmpl, info)
+
+    const msg = stringTemplate(
+      messageTmpl,
+      WError.fullInfo(cause, info)
+    )
     return new this(
       msg + '\ncause: ' + cause.message,
       cause,
