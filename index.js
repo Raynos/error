@@ -40,10 +40,6 @@ class StructuredError extends Error {
     return { ...this.__info }
   }
 
-  cause () {
-    return null
-  }
-
   toJSON () {
     return {
       ...this.__info,
