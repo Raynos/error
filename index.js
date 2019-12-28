@@ -189,8 +189,8 @@ class MultiError extends Error {
 
     this.__errors = errors
     this.name = this.constructor.name
-    this.type = 'multi-error-' +
-      errors[0].type || createTypeStr(errors[0].type)
+    this.type = createTypeStr(this.name) + '--' +
+      errors[0].type || createTypeStr(errors[0].name)
   }
 
   errors () {
