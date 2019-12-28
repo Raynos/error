@@ -1,54 +1,46 @@
 # error
 
-<!--
-    [![build status][1]][2]
-    [![NPM version][3]][4]
-    [![Coverage Status][5]][6]
-    [![gemnasium Dependency Status][7]][8]
-    [![Davis Dependency status][9]][10]
--->
+Wrap errors with more context.
 
-<!-- [![browser support][11]][12] -->
+## Inspiration
 
-Custom errors
+This module is inspired by the go error libraries that have simple
+functions for creating & wrapping errors.
 
-## README for V7.x Branch.
+This is based on libraries like [eris][eris] & [pkg/errors][pkg-errors]
 
-## Typed Error
+## Structured errors
 
 ```js
-var TypedError = require("error/typed")
+const { Serror } = require('error')
 
-var ServerError = TypedError({
-    type: 'server.5xx',
-    message: '{title} server error, status={statusCode}',
-    title: null,
-    statusCode: null
-});
-var ClientError = TypedError({
-    type: 'client.4xx',
-    message: '{title} client error, status={statusCode}',
-    title: null,
-    statusCode: null
-});
+class ServerError extends Serror {}
+class ClientError extends SError {}
 
-var error = ServerError({
-    title:'some title',
+const err = ServerError.create(
+  '{title} server error, status={statusCode}', {
+    title: 'some title',
     statusCode: 500
-});
-var error2 = ClientError({
+  }
+)
+const err2 = ClientError.create(
+  '{title} client error, status={statusCode}', {
     title: 'some title',
     statusCode: 404
-});
+  }
+)
 ```
 
 ## Wrapped Errors
 
 ```js
-var net = require('net');
-var WrappedError = require('error/wrapped');
+const net = require('net');
+const { WError } = require('error')
 
-var ServerListenError = WrappedError({
+class ServerListenError extends WError {}
+
+
+var ServerListenFailedError = WrappedError({
     message: 'server: {origMessage}',
     type: 'server.listen-failed',
     requestedPort: null,
@@ -58,14 +50,16 @@ var ServerListenError = WrappedError({
 var server = net.createServer();
 
 server.on('error', function onError(err) {
-    if (err.code === 'EADDRINUSE') {
-        throw ServerListenError(err, {
-            requestedPort: 3000,
-            host: null
-        });
-    } else {
-        throw err;
-    }
+  if (err.code === 'EADDRINUSE') {
+    throw ServerListenFailedError.wrap(
+      'error in server', err, {
+        requestPort: 3000,
+        host: null
+      }
+    )
+  } else {
+    throw err;
+  }
 });
 
 server.listen(3000);
@@ -81,15 +75,5 @@ server.listen(3000);
 
 ## MIT Licenced
 
-  [1]: https://secure.travis-ci.org/Raynos/error.png
-  [2]: https://travis-ci.org/Raynos/error
-  [3]: https://badge.fury.io/js/error.png
-  [4]: https://badge.fury.io/js/error
-  [5]: https://coveralls.io/repos/Raynos/error/badge.png
-  [6]: https://coveralls.io/r/Raynos/error
-  [7]: https://gemnasium.com/Raynos/error.png
-  [8]: https://gemnasium.com/Raynos/error
-  [9]: https://david-dm.org/Raynos/error.png
-  [10]: https://david-dm.org/Raynos/error
-  [11]: https://ci.testling.com/Raynos/error.png
-  [12]: https://ci.testling.com/Raynos/error
+  [eris]: https://github.com/rotisserie/eris/tree/v0.1.0
+  [pkg-errors]: https://github.com/pkg/errors
