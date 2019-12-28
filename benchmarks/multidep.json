@@ -1,0 +1,6 @@
+{
+  "path": "benchmarks/multidep_modules",
+  "versions": {
+    "error": ["7.2.1"]
+  }
+}
