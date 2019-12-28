@@ -39,14 +39,6 @@ const { WError } = require('error')
 
 class ServerListenError extends WError {}
 
-
-var ServerListenFailedError = WrappedError({
-    message: 'server: {origMessage}',
-    type: 'server.listen-failed',
-    requestedPort: null,
-    host: null
-});
-
 var server = net.createServer();
 
 server.on('error', function onError(err) {
