@@ -25,7 +25,7 @@ const PLAIN_ERROR_FIELDS = [
   'operator'
 ]
 
-class SError extends Error {
+class StructuredError extends Error {
   constructor (message, info) {
     super(message)
     assert(typeof message === 'string')
@@ -65,9 +65,9 @@ class SError extends Error {
     return new this(msg, info || null)
   }
 }
-exports.SError = SError
+exports.SError = StructuredError
 
-class WError extends Error {
+class WrappedError extends Error {
   constructor (message, cause, info) {
     super(message)
     assert(typeof message === 'string')
@@ -102,7 +102,7 @@ class WError extends Error {
   }
 
   info () {
-    return WError.fullInfo(this.cause(), this.__info)
+    return WrappedError.fullInfo(this.cause(), this.__info)
   }
 
   toJSON () {
@@ -162,7 +162,7 @@ class WError extends Error {
 
     const msg = stringTemplate(
       messageTmpl,
-      WError.fullInfo(cause, info)
+      WrappedError.fullInfo(cause, info)
     )
     return new this(
       msg + ': ' + cause.message,
@@ -171,7 +171,7 @@ class WError extends Error {
     )
   }
 }
-exports.WError = WError
+exports.WError = WrappedError
 
 class MultiError extends Error {
   constructor (errors) {
@@ -261,12 +261,12 @@ function fullStack (err) {
 exports.fullStack = fullStack
 
 function wrapf (messageTmpl, cause, info) {
-  return WError.wrap(messageTmpl, cause, info)
+  return WrappedError.wrap(messageTmpl, cause, info)
 }
 exports.wrapf = wrapf
 
 function errorf (messageTmpl, info) {
-  return SError.create(messageTmpl, info)
+  return StructuredError.create(messageTmpl, info)
 }
 exports.errorf = errorf
 
