@@ -1,6 +1,10 @@
 /* eslint-disable */
 'use strict'
 
+/**
+ * Taken from https://www.npmjs.com/package/string-template.
+ * source: https://github.com/Matt-Esch/string-template
+ */
 var nargs = /\{([0-9a-zA-Z_]+)\}/g
 
 module.exports = template
