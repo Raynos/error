@@ -19,7 +19,10 @@ const PLAIN_ERROR_FIELDS = [
   'requestId',
   'retryable',
   'description',
-  'path'
+  'path',
+  'actual',
+  'expected',
+  'operator'
 ]
 
 class SError extends Error {
