@@ -1,206 +1,252 @@
-'use strict';
+'use strict'
 
-var test = require('tape');
-var net = require('net');
+const test = require('tape')
+const net = require('net')
 
-var WrappedError = require('../wrapped.js');
+const { WError } = require('../index.js')
 
-test('can create a wrapped error', function t(assert) {
-    var ServerListenError = WrappedError({
-        name: 'SomeError',
-        message: 'server: {causeMessage}',
-        type: 'server.listen-failed',
-        requestedPort: null,
-        host: null
-    });
+test('can create a wrapped error', function t (assert) {
+  class ServerListenFailedError extends WError {}
 
-    var err = new Error('listen EADDRINUSE');
-    err.code = 'EADDRINUSE';
+  var err = new Error('listen EADDRINUSE')
+  err.code = 'EADDRINUSE'
 
-    var err2 = ServerListenError(err, {
-        requestedPort: 3426,
-        host: 'localhost'
-    });
+  var err2 = ServerListenFailedError.wrap(
+    'server failed', err, {
+      requestedPort: 3426,
+      host: 'localhost'
+    }
+  )
 
-    assert.equal(ServerListenError.type, 'server.listen-failed');
+  assert.equal(
+    ServerListenFailedError.type,
+    'server.listen.failed.error'
+  )
 
-    assert.equal(err2.message, 'server: listen EADDRINUSE');
-    assert.equal(err2.requestedPort, 3426);
-    assert.equal(err2.host, 'localhost');
-    assert.equal(err2.code, 'EADDRINUSE');
+  assert.equal(err2.message, 'server failed: listen EADDRINUSE')
+  assert.equal(err2.info().requestedPort, 3426)
+  assert.equal(err2.info().host, 'localhost')
+  assert.equal(err2.info().code, 'EADDRINUSE')
 
-    assert.equal(err2.cause, err);
+  assert.equal(err2.cause(), err)
 
-    assert.equal(err2.toString(),
-        'ServerListenFailedError: server: listen EADDRINUSE');
+  assert.equal(err2.toString(),
+    'ServerListenFailedError: server failed: listen EADDRINUSE')
 
-    assert.equal(JSON.stringify(err2), JSON.stringify({
-        type: 'server.listen-failed',
-        name: 'ServerListenFailedError',
-        message: 'server: listen EADDRINUSE',
-        requestedPort: 3426,
-        host: 'localhost',
-        causeMessage: 'listen EADDRINUSE',
-        origMessage: 'listen EADDRINUSE',
-        code: 'EADDRINUSE',
-        fullType: 'server.listen-failed~!~error.wrapped-unknown'
-    }));
+  assert.equal(JSON.stringify(err2), JSON.stringify({
+    code: 'EADDRINUSE',
+    requestedPort: 3426,
+    host: 'localhost',
+    message: 'server failed: listen EADDRINUSE',
+    stack: err2.stack,
+    type: 'server.listen.failed.error',
+    fullType: 'server.listen.failed.error~!~' +
+      'error.wrapped-unknown',
+    name: 'ServerListenFailedError',
+    cause: {
+      code: err.code,
+      message: err.message,
+      name: err.name
+    }
+  }))
 
-    assert.end();
-});
+  assert.end()
+})
 
-test('can create wrapped error with syscall', function t(assert) {
-    var SysCallError = WrappedError({
-        'message': 'tchannel socket error ({code} from ' +
-            '{syscall}): {origMessage}',
-        type: 'syscall.error'
-    });
+test('can create wrapped error with syscall', function t (assert) {
+  class SyscallError extends WError {}
 
-    var err = new Error('listen EADDRINUSE');
-    err.code = 'EADDRINUSE';
-    err.syscall = 'listen';
+  const err = new Error('listen EADDRINUSE')
+  err.code = 'EADDRINUSE'
+  err.syscall = 'listen'
 
-    var err2 = SysCallError(err);
+  const err2 = SyscallError.wrap(
+    'tchannel socket error ({code} from {syscall})', err
+  )
 
-    assert.equal(err2.message, 'tchannel socket error ' +
-        '(EADDRINUSE from listen): listen EADDRINUSE');
-    assert.equal(err2.syscall, 'listen');
-    assert.equal(err2.code, 'EADDRINUSE');
-    assert.equal(err2.type, 'syscall.error');
+  assert.equal(err2.message, 'tchannel socket error ' +
+    '(EADDRINUSE from listen): listen EADDRINUSE')
+  assert.equal(err2.info().syscall, 'listen')
+  assert.equal(err2.info().code, 'EADDRINUSE')
+  assert.equal(err2.type, 'syscall.error')
 
-    assert.end();
-});
+  assert.end()
+})
 
-test('wrapping twice', function t(assert) {
-    var ReadError = WrappedError({
-        type: 'my.read-error',
-        message: 'read: {causeMessage}'
-    });
+test('wrapping twice', function t (assert) {
+  class ReadError extends WError {}
+  class DatabaseError extends WError {}
+  class BusinessError extends WError {}
 
-    var DatabaseError = WrappedError({
-        type: 'my.database-error',
-        message: 'db: {causeMessage}'
-    });
+  const err = BusinessError.wrap(
+    'business', DatabaseError.wrap(
+      'db', ReadError.wrap('read', new Error('oops'))
+    )
+  )
+  assert.ok(err)
 
-    var BusinessError = WrappedError({
-        type: 'my.business-error',
-        message: 'business: {causeMessage}'
-    });
+  assert.equal(err.message, 'business: db: read: oops')
+  assert.equal(err.type, 'business.error')
+  assert.equal(err.fullType(), 'business.error~!~' +
+    'database.error~!~' +
+    'read.error~!~' +
+    'error.wrapped-unknown')
 
-    var err = BusinessError(
-        DatabaseError(
-            ReadError(
-                new Error('oops')
-            )
-        )
-    );
-    assert.ok(err);
-
-    assert.equal(err.message, 'business: db: read: oops');
-    assert.equal(err.type, 'my.business-error');
-    assert.equal(err.fullType, 'my.business-error~!~' +
-        'my.database-error~!~' +
-        'my.read-error~!~' +
-        'error.wrapped-unknown');
-
-    assert.end();
-});
-
-test('handles bad recursive strings', function t(assert) {
-    var ReadError = WrappedError({
-        type: 'wat.wat',
-        message: 'read: {causeMessage}'
-    });
-
-    var err2 = ReadError(new Error('hi {causeMessage}'));
-
-    assert.ok(err2);
-    assert.equal(err2.message,
-        'read: hi $INVALID_CAUSE_MESSAGE_LITERAL');
-
-    assert.end();
-});
-
-test('can wrap real IO errors', function t(assert) {
-    var ServerListenError = WrappedError({
-        message: 'server: {causeMessage}',
-        type: 'server.listen-failed',
-        requestedPort: null,
-        host: null
-    });
-
-    var otherServer = net.createServer();
-    otherServer.once('listening', onPortAllocated);
-    otherServer.listen(0);
-
-    function onPortAllocated() {
-        var port = otherServer.address().port;
-
-        var server = net.createServer();
-        server.on('error', onError);
-
-        server.listen(port);
-
-        function onError(cause) {
-            var err = ServerListenError(cause, {
-                host: 'localhost',
-                requestedPort: port
-            });
-
-            otherServer.close();
-            assertOnError(err, cause, port);
+  assert.equal(JSON.stringify(err), JSON.stringify({
+    message: 'business: db: read: oops',
+    stack: err.stack,
+    type: 'business.error',
+    fullType: 'business.error~!~database.error~!~' +
+      'read.error~!~error.wrapped-unknown',
+    name: 'BusinessError',
+    cause: {
+      message: 'db: read: oops',
+      type: 'database.error',
+      fullType: 'database.error~!~' +
+        'read.error~!~error.wrapped-unknown',
+      name: 'DatabaseError',
+      cause: {
+        message: 'read: oops',
+        type: 'read.error',
+        fullType: 'read.error~!~error.wrapped-unknown',
+        name: 'ReadError',
+        cause: {
+          message: 'oops',
+          name: 'Error'
         }
+      }
     }
+  }))
 
-    function assertOnError(err, cause, port) {
-        assert.ok(err.message.indexOf('server: ') >= 0)
-        assert.ok(err.message.indexOf('listen EADDRINUSE') >= 0)
-        assert.equal(err.requestedPort, port);
-        assert.equal(err.host, 'localhost');
-        assert.equal(err.code, 'EADDRINUSE');
+  assert.end()
+})
 
-        assert.equal(err.cause, cause);
+test('handles bad recursive strings', function t (assert) {
+  class ReadError extends WError {}
 
-        assert.ok(err.toString().indexOf('ServerListenFailedError: ') >= 0)
-        assert.ok(err.toString().indexOf('server: ') >= 0)
-        assert.ok(err.toString().indexOf('listen EADDRINUSE') >= 0)
-
-        var expectedMessage = err.message
-        var expectedOrigMessage = err.origMessage
-
-        assert.ok(err.origMessage.indexOf('listen EADDRINUSE') >= 0)
-        assert.ok(err.origMessage.indexOf('server: ') === -1)
-
-        assert.equal(JSON.stringify(err), JSON.stringify({
-            type: 'server.listen-failed',
-            name: 'ServerListenFailedError',
-            message: expectedMessage,
-            requestedPort: port,
-            host: 'localhost',
-            causeMessage: expectedOrigMessage,
-            origMessage: expectedOrigMessage,
-            code: 'EADDRINUSE',
-            errno: 'EADDRINUSE',
-            syscall: 'listen',
-            fullType: 'server.listen-failed~!~' +
-                'error.wrapped-io.listen.EADDRINUSE'
-        }));
-
-        assert.end();
+  const err2 = ReadError.wrap(
+    'read: {code}', new Error('hi'), {
+      code: 'extra {code}'
     }
-});
+  )
 
-test('can wrap assert errors', function t(assert) {
-  var TestError = WrappedError({
-      message: 'error: {origMessage}',
-      type: 'error'
-  });
+  assert.ok(err2)
+  assert.equal(err2.message, 'read: extra {code}: hi')
 
-  var assertError;
-  try { require('assert').equal('a', 'b'); }
-  catch (_err) { assertError = _err; }
+  assert.end()
+})
 
-  var err = TestError(assertError);
-  assert.equal(err.cause.actual, 'a');
-  assert.end();
+test('can wrap real IO errors', function t (assert) {
+  class ServerListenFailedError extends WError {}
+
+  const otherServer = net.createServer()
+  otherServer.once('listening', onPortAllocated)
+  otherServer.listen(0)
+
+  function onPortAllocated () {
+    const port = otherServer.address().port
+
+    const server = net.createServer()
+    server.on('error', onError)
+
+    server.listen(port)
+
+    function onError (cause) {
+      const err = ServerListenFailedError.wrap(
+        'server listen failed', cause, {
+          host: 'localhost',
+          requestedPort: port
+        }
+      )
+
+      otherServer.close()
+      assertOnError(err, cause, port)
+    }
+  }
+
+  function assertOnError (err, cause, port) {
+    assert.ok(err.message.indexOf('server listen failed: ') >= 0)
+    assert.ok(err.message.indexOf('listen EADDRINUSE') >= 0)
+    assert.equal(err.info().requestedPort, port)
+    assert.equal(err.info().host, 'localhost')
+    assert.equal(err.info().code, 'EADDRINUSE')
+
+    assert.equal(err.cause(), cause)
+
+    assert.ok(err.toString().indexOf('ServerListenFailedError: ') >= 0)
+    assert.ok(err.toString().indexOf('server listen failed: ') >= 0)
+    assert.ok(err.toString().indexOf('listen EADDRINUSE') >= 0)
+
+    assert.equal(JSON.stringify(err), JSON.stringify({
+      code: 'EADDRINUSE',
+      errno: 'EADDRINUSE',
+      syscall: 'listen',
+      host: 'localhost',
+      requestedPort: port,
+      message: err.message,
+      stack: err.stack,
+      type: 'server.listen.failed.error',
+      fullType: 'server.listen.failed.error~!~' +
+        'error.wrapped-io.listen.EADDRINUSE',
+      name: 'ServerListenFailedError',
+      cause: {
+        code: 'EADDRINUSE',
+        errno: 'EADDRINUSE',
+        syscall: 'listen',
+        message: err.cause().message,
+        name: 'Error'
+      }
+    }))
+
+    assert.end()
+  }
+})
+
+test('can wrap assert errors', function t (assert) {
+  class TestError extends WError {}
+
+  let assertError
+  try {
+    require('assert').strictEqual('a', 'b')
+  } catch (_err) {
+    assertError = _err
+  }
+
+  const err = TestError.wrap('error', assertError)
+  assert.equal(err.cause().actual, 'a')
+
+  if (err.message === `error: 'a' === 'b'`) {
+    assert.equal(err.message, `error: 'a' === 'b'`)
+  } else {
+    assert.ok(/[eE]xpected /.test(err.message))
+    assert.ok(err.message.includes('strictly equal'))
+  }
+
+  assert.ok(err.cause().name.includes('AssertionError'))
+  assert.ok(
+    err.info().operator === '===' ||
+    err.info().operator === 'strictEqual'
+  )
+
+  assert.equal(JSON.stringify(err), JSON.stringify({
+    code: 'ERR_ASSERTION',
+    actual: 'a',
+    expected: 'b',
+    operator: err.info().operator,
+    message: 'error: ' + err.cause().message,
+    stack: err.stack,
+    type: 'test.error',
+    fullType: 'test.error~!~error.wrapped-unknown',
+    name: 'TestError',
+    cause: {
+      code: 'ERR_ASSERTION',
+      actual: 'a',
+      expected: 'b',
+      operator: err.cause().operator,
+      message: err.cause().message,
+      name: err.cause().name
+    }
+  }))
+
+  assert.end()
 })

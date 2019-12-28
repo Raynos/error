@@ -16,11 +16,10 @@
     "url": "https://github.com/Raynos/error/issues",
     "email": "raynos2@gmail.com"
   },
-  "dependencies": {
-    "string-template": "~0.2.1"
-  },
+  "dependencies": {},
   "devDependencies": {
     "istanbul": "0.3.13",
+    "multidep": "2.0.2",
     "tape": "^3.5.0",
     "uber-standard": "3.6.4"
   },
@@ -31,7 +30,8 @@
     }
   ],
   "scripts": {
-    "lint": "standard -v .",
+    "multidep": "multidep benchmarks/multidep.json",
+    "lint": "standard -v",
     "test": "npm run lint && node test/index.js",
     "travis-test": "istanbul cover ./test/index.js && ((cat coverage/lcov.info | coveralls) || exit 0)",
     "cover": "istanbul cover --report none --print detail ./test/index.js",

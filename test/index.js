@@ -1,4 +1,5 @@
-'use strict';
+'use strict'
 
-require('./typed.js');
-require('./wrapped.js');
+require('./multi.js')
+require('./typed.js')
+require('./wrapped.js')

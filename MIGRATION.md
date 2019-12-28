@@ -1,5 +1,10 @@
 ## Migration
 
+## Version 10
+
+The 10th version is a complete rewrite. Check out the `v7.x`
+branch for the older implementation.
+
 ## Version 7
 
 The `message` parameter to `TypedError` is now
