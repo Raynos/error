@@ -113,6 +113,10 @@ class WError extends Error {
       causeJSON = getJSONForPlainError(this.__cause)
     }
 
+    if (causeJSON.stack) {
+      delete causeJSON.stack
+    }
+
     return {
       ...this.info(),
       message: this.message,
@@ -277,7 +281,6 @@ function getJSONForPlainError (err) {
   let obj = getInfoForPlainError(err)
   Object.assign(obj, {
     message: err.message,
-    stack: err.stack,
     type: err.type,
     name: err.name
   })
