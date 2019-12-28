@@ -12,6 +12,8 @@
 
 Custom errors
 
+## README for V7.x Branch.
+
 ## Typed Error
 
 ```js
