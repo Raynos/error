@@ -1,66 +1,85 @@
-'use strict';
+'use strict'
 
-var test = require('tape');
+const test = require('tape')
 
-var TypedError = require('../typed.js');
+const { SError } = require('../index.js')
 
-test('a server error', function t(assert) {
-    var ServerError = TypedError({
-        type: 'server.5xx.error',
-        message: '{title} server error, status={statusCode}'
-    });
+test('a server error', function t (assert) {
+  class Server5XXError extends SError {}
+  const error = Server5XXError.create(
+    '{title} server error, status={statusCode}', {
+      title: 'some title',
+      statusCode: 500
+    }
+  )
 
-    var error = ServerError({
-        title: 'some title',
-        statusCode: 500
-    });
+  assert.equal(Server5XXError.type, 'server.5xx.error')
 
-    assert.equal(ServerError.type, 'server.5xx.error');
+  assert.equal(error.type, 'server.5xx.error')
+  assert.equal(error.info().statusCode, 500)
+  assert.equal(error.message, 'some title server error, status=500')
+  assert.equal(error.toString(),
+    'Server5XXError: some title server error, status=500')
 
-    assert.equal(error.type, 'server.5xx.error');
-    assert.equal(error.fullType, 'server.5xx.error');
-    assert.equal(error.statusCode, 500);
-    assert.equal(error.message, 'some title server error, status=500');
-    assert.equal(error.toString(),
-        'Server5xxErrorError: some title server error, status=500')
+  assert.deepEqual(error.info(), {
+    title: 'some title',
+    statusCode: 500
+  })
+  assert.deepEqual(error.toJSON(), {
+    message: error.message,
+    name: error.name,
+    stack: error.stack,
+    title: 'some title',
+    statusCode: 500,
+    type: error.type
+  })
 
-    assert.end();
-});
-
-test('null fields', function t(assert) {
-    var NullError = TypedError({
-        type: 'myError',
-        message: 'myError',
-        length: null,
-        buffer: null,
-        state: null,
-        expecting: null
-    })
-
-    var e = NullError()
-    assert.equal(e.type, 'myError')
-    assert.equal(NullError.type, 'myError')
-
-    assert.end()
+  assert.end()
 })
 
-test('a client error', function t(assert) {
-    var ClientError = TypedError({
-        type: 'client.4xx.error',
-        message: '{title} client error, status={statusCode}'
-    });
+test('null fields', function t (assert) {
+  class NullError extends SError {}
 
-    var error2 = ClientError({
-        title: 'some title',
-        statusCode: 404
-    });
+  const e = NullError.create('myError', {
+    length: null,
+    buffer: null,
+    state: null,
+    expecting: null
+  })
+  assert.equal(e.type, 'null.error')
+  assert.equal(NullError.type, 'null.error')
 
-    assert.equal(error2.type, 'client.4xx.error');
-    assert.equal(error2.fullType, 'client.4xx.error');
-    assert.equal(error2.statusCode, 404);
-    assert.equal(error2.message, 'some title client error, status=404');
-    assert.equal(error2.toString(),
-        'Client4xxErrorError: some title client error, status=404')
+  assert.end()
+})
 
-    assert.end();
-});
+test('a client error', function t (assert) {
+  class Client4XXError extends SError {}
+
+  const error2 = Client4XXError.create(
+    '{title} client error, status={statusCode}', {
+      title: 'some title',
+      statusCode: 404
+    }
+  )
+
+  assert.equal(error2.type, 'client.4xx.error')
+  assert.equal(error2.info().statusCode, 404)
+  assert.equal(error2.message, 'some title client error, status=404')
+  assert.equal(error2.toString(),
+    'Client4XXError: some title client error, status=404')
+
+  assert.deepEqual(error2.info(), {
+    title: 'some title',
+    statusCode: 404
+  })
+  assert.deepEqual(error2.toJSON(), {
+    message: error2.message,
+    name: error2.name,
+    stack: error2.stack,
+    title: 'some title',
+    statusCode: 404,
+    type: error2.type
+  })
+
+  assert.end()
+})
