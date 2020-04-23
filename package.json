@@ -20,8 +20,8 @@
   "devDependencies": {
     "istanbul": "0.3.13",
     "multidep": "2.0.2",
-    "tape": "^3.5.0",
-    "uber-standard": "3.6.4"
+    "standard": "14.3.3",
+    "tape": "^3.5.0"
   },
   "licenses": [
     {

@@ -215,8 +215,8 @@ test('can wrap assert errors', function t (assert) {
   const err = TestError.wrap('error', assertError)
   assert.equal(err.cause().actual, 'a')
 
-  if (err.message === `error: 'a' === 'b'`) {
-    assert.equal(err.message, `error: 'a' === 'b'`)
+  if (err.message === "error: 'a' === 'b'") {
+    assert.equal(err.message, "error: 'a' === 'b'")
   } else {
     assert.ok(/[eE]xpected /.test(err.message))
     assert.ok(err.message.includes('strictly equal'))

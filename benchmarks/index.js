@@ -39,7 +39,7 @@ const ServerListenWrappedError = WrappedError({
   host: null
 })
 
-let out = {
+const out = {
   result: null
 }
 
@@ -70,7 +70,7 @@ if (mode === 'alloc') {
 }
 
 function allocTypedError (count) {
-  let start = Date.now()
+  const start = Date.now()
   for (let i = 0; i < count; i++) {
     out.result = ServerTypedError({
       title: 'some title',
@@ -80,7 +80,7 @@ function allocTypedError (count) {
   return Date.now() - start
 }
 function stringifyTypedError (count) {
-  let start = Date.now()
+  const start = Date.now()
   const err = ServerTypedError({
     title: 'some title',
     statusCode: 500
@@ -96,7 +96,7 @@ function stringifyTypedError (count) {
 }
 
 function allocWrappedError (count) {
-  let start = Date.now()
+  const start = Date.now()
   for (let i = 0; i < count; i++) {
     out.result = ServerListenWrappedError(
       new Error('EADDRINUSE'), {
@@ -108,7 +108,7 @@ function allocWrappedError (count) {
   return Date.now() - start
 }
 function stringifyWrappedError (count) {
-  let start = Date.now()
+  const start = Date.now()
   const err = ServerListenWrappedError(
     new Error('EADDRINUSE'), {
       requestedPort: 3000,
@@ -126,7 +126,7 @@ function stringifyWrappedError (count) {
 }
 
 function allocSError (count) {
-  let start = Date.now()
+  const start = Date.now()
   for (let i = 0; i < count; i++) {
     out.result = ServerError.create(
       '{title} server error, status={statusCode}', {
@@ -138,7 +138,7 @@ function allocSError (count) {
   return Date.now() - start
 }
 function stringifySError (count) {
-  let start = Date.now()
+  const start = Date.now()
   const err = ServerError.create(
     '{title} server error, status={statusCode}', {
       title: 'some title',
@@ -152,7 +152,7 @@ function stringifySError (count) {
 }
 
 function allocWError (count) {
-  let start = Date.now()
+  const start = Date.now()
   for (let i = 0; i < count; i++) {
     out.result = ServerListenError.wrap(
       'server', new Error('EADDRINUSE'), {
@@ -164,7 +164,7 @@ function allocWError (count) {
   return Date.now() - start
 }
 function stringifyWError (count) {
-  let start = Date.now()
+  const start = Date.now()
   const err = ServerListenError.wrap(
     'server', new Error('EADDRINUSE'), {
       title: 'some title',

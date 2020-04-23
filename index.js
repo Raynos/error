@@ -202,7 +202,7 @@ class MultiError extends Error {
   }
 
   toJSON () {
-    let out = []
+    const out = []
     for (const e of this.__errors) {
       if (typeof e.toJSON === 'function') {
         const nestedJSON = e.toJSON()
@@ -302,7 +302,7 @@ function isError (err) {
 }
 
 function getJSONForPlainError (err) {
-  let obj = getInfoForPlainError(err)
+  const obj = getInfoForPlainError(err)
   Object.assign(obj, {
     message: err.message,
     type: err.type,
