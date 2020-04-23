@@ -73,6 +73,28 @@ test('can create wrapped error with syscall', function t (assert) {
   assert.end()
 })
 
+test('wrapping with skipCauseMessage', function t (assert) {
+  class SyscallError extends WError {}
+
+  const err = new Error('listen EADDRINUSE')
+  err.code = 'EADDRINUSE'
+  err.syscall = 'listen'
+
+  const err2 = SyscallError.wrap(
+    'tchannel socket error ({code} from {syscall})', err, {
+      skipCauseMessage: true
+    }
+  )
+
+  assert.equal(err2.message, 'tchannel socket error ' +
+    '(EADDRINUSE from listen)')
+  assert.equal(err2.info().syscall, 'listen')
+  assert.equal(err2.info().code, 'EADDRINUSE')
+  assert.equal(err2.type, 'syscall.error')
+
+  assert.end()
+})
+
 test('wrapping twice', function t (assert) {
   class ReadError extends WError {}
   class DatabaseError extends WError {}

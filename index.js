@@ -164,15 +164,16 @@ class WrappedError extends Error {
     assert(typeof messageTmpl === 'string')
     assert(cause && isError(cause))
 
-    const msg = stringTemplate(
+    let msg = stringTemplate(
       messageTmpl,
       WrappedError.fullInfo(cause, info)
     )
-    return new this(
-      msg + ': ' + cause.message,
-      cause,
-      info || null
-    )
+
+    if (!info || !info.skipCauseMessage) {
+      msg = msg + ': ' + cause.message
+    }
+
+    return new this(msg, cause, info || null)
   }
 }
 exports.WError = WrappedError

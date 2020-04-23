@@ -208,6 +208,24 @@ When using the `WError` class it's recommended to always call
 the static `wrap()` method instead of calling the constructor
 directly.
 
+Example (without cause message):
+
+```js
+class ApplicationStartupError extends WError {}
+
+ApplicationStartupError.wrap(
+  'Could not start the application cleanly: {reason}',
+  err,
+  {
+    skipCauseMessage: true,
+    reason: 'Failed to read from disk'
+  }
+)
+```
+
+Setting `skipCauseMessage: true` will not append the cause
+error message but still make the cause object available.
+
 ### `const werr = new WError(message, cause, info)`
 
 Internal constructor, should pass a `message` string, a `cause`
@@ -221,6 +239,10 @@ with `info` as a parameter.
 
 The `cause` parameter must be an `error`
 The `info` parameter is an object or `null`.
+
+The `info` parameter can contain the field `skipCauseMessage: true`
+which will make `WError` not append `: ${causeMessage}` to the
+message of the error.
 
 ### `werr.type`
 
