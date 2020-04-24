@@ -14,6 +14,12 @@ This is based on libraries like [eris][eris] & [pkg/errors][pkg-errors]
 If you are looking for the older v7 version of error you should
 check [v7.x][7.x] branch
 
+## Using `error` with `async` / `await`
+
+Check out [`resultify`](https://www.npmjs.com/package/resultify) ! 
+
+The rest of the examples use plain vanilla callbacks.
+
 ## Motivation
 
 Wrapping errors when bubbling up instead of just doing
