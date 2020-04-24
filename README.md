@@ -30,6 +30,10 @@ information about the failure as it bubbles up.
 There is more information about how to handle errors in this
 article [Don't just check errors, handle them gracefully][dave]
 
+If you want a deep dive into the difference between
+[Programming and Operational errors](https://www.joyent.com/node-js/production/design/errors)
+please check out [this guide](https://www.joyent.com/node-js/production/design/errors)
+
 examples:
 
 ```js
