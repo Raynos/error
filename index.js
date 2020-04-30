@@ -2,11 +2,11 @@
 
 const assert = require('assert')
 
-const stringTemplate = require('./string-template')
-
+const nargs = /\{([0-9a-zA-Z_]+)\}/g
 const lowerCaseKebabRegex = /([a-z])([0-9A-Z])/g
 const upperCaseKebabRegex = /([A-Z])([A-Z])(?=[a-z])/g
 
+const hasOwnProperty = Object.prototype.hasOwnProperty
 const PLAIN_ERROR_FIELDS = [
   'code',
   'errno',
@@ -51,7 +51,7 @@ class StructuredError extends Error {
   }
 
   static get type () {
-    if (Object.prototype.hasOwnProperty.call(this, '__type')) {
+    if (hasOwnProperty.call(this, '__type')) {
       return this.__type
     }
     this.__type = createTypeStr(this.name)
@@ -129,7 +129,7 @@ class WrappedError extends Error {
   }
 
   static get type () {
-    if (Object.prototype.hasOwnProperty.call(this, '__type')) {
+    if (hasOwnProperty.call(this, '__type')) {
       return this.__type
     }
     this.__type = createTypeStr(this.name)
@@ -310,4 +310,41 @@ function getJSONForPlainError (err) {
     name: err.name
   })
   return obj
+}
+
+/**
+ * Taken from https://www.npmjs.com/package/string-template.
+ * source: https://github.com/Matt-Esch/string-template
+ */
+function stringTemplate (string) {
+  var args
+
+  if (arguments.length === 2 && typeof arguments[1] === 'object') {
+    args = arguments[1]
+  } else {
+    args = new Array(arguments.length - 1)
+    for (var i = 1; i < arguments.length; ++i) {
+      args[i - 1] = arguments[i]
+    }
+  }
+
+  if (!args || !args.hasOwnProperty) {
+    args = {}
+  }
+
+  return string.replace(nargs, function replaceArg (match, i, index) {
+    var result
+
+    if (string[index - 1] === '{' &&
+            string[index + match.length] === '}') {
+      return i
+    } else {
+      result = hasOwnProperty.call(args, i) ? args[i] : null
+      if (result === null || result === undefined) {
+        return ''
+      }
+
+      return result
+    }
+  })
 }
