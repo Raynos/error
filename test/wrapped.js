@@ -1,6 +1,6 @@
 'use strict'
 
-const test = require('tape')
+const test = require('@pre-bundled/tape')
 const net = require('net')
 
 const { WError } = require('../index.js')
