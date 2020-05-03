@@ -81,7 +81,7 @@ class WrappedError extends Error {
   /**
    * @param {string} message
    * @param {CustomError} cause
-   * @param {object} info
+   * @param {object | null} info
    */
   constructor (message, cause, info) {
     super(message)
@@ -165,7 +165,7 @@ class WrappedError extends Error {
 
   /**
    * @param {CustomError} cause
-   * @param {object} info
+   * @param {object | null} [info]
    */
   static fullInfo (cause, info) {
     let existing
@@ -186,7 +186,7 @@ class WrappedError extends Error {
   /**
    * @param {string} messageTmpl
    * @param {Error} cause
-   * @param {object} info
+   * @param {object} [info]
    */
   static wrap (messageTmpl, cause, info) {
     assert(typeof messageTmpl === 'string')
