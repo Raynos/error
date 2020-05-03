@@ -21,6 +21,9 @@
     "standard": "14.3.3",
     "typescript": "3.8.3"
   },
+  "standard": {
+    "ignore": ["interfaces.d.ts"]
+  },
   "dependencies": {},
   "devDependencies": {
     "@pre-bundled/tape": "5.0.0",

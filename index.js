@@ -2,6 +2,10 @@
 
 const assert = require('assert')
 
+/**
+ * @typedef {import('./interfaces').CustomError} CustomError
+ */
+
 const nargs = /\{([0-9a-zA-Z_]+)\}/g
 const lowerCaseKebabRegex = /([a-z])([0-9A-Z])/g
 const upperCaseKebabRegex = /([A-Z])([A-Z])(?=[a-z])/g
@@ -26,6 +30,10 @@ const PLAIN_ERROR_FIELDS = [
 ]
 
 class StructuredError extends Error {
+  /**
+   * @param {string} message
+   * @param {object | null} info
+   */
   constructor (message, info) {
     super(message)
     assert(typeof message === 'string')
@@ -40,6 +48,7 @@ class StructuredError extends Error {
     return { ...this.__info }
   }
 
+  /** @returns {{ [k: string]: unknown }} */
   toJSON () {
     return {
       ...this.__info,
@@ -58,6 +67,10 @@ class StructuredError extends Error {
     return this.__type
   }
 
+  /**
+   * @param {string} messageTmpl
+   * @param {object} [info]
+   */
   static create (messageTmpl, info) {
     assert(typeof messageTmpl === 'string')
     const msg = stringTemplate(messageTmpl, info)
@@ -68,6 +81,11 @@ class StructuredError extends Error {
 exports.SError = StructuredError
 
 class WrappedError extends Error {
+  /**
+   * @param {string} message
+   * @param {CustomError} cause
+   * @param {object} info
+   */
   constructor (message, cause, info) {
     super(message)
     assert(typeof message === 'string')
@@ -105,6 +123,7 @@ class WrappedError extends Error {
     return WrappedError.fullInfo(this.cause(), this.__info)
   }
 
+  /** @returns {{ [k: string]: unknown }} */
   toJSON () {
     let causeJSON
     if (typeof this.__cause.toJSON === 'function') {
@@ -136,14 +155,25 @@ class WrappedError extends Error {
     return this.__type
   }
 
+  /**
+   * @param {Error} err
+   */
   static fullStack (err) {
     return fullStack(err)
   }
 
+  /**
+   * @param {Error} err
+   * @param {string} name
+   */
   static findCauseByName (err, name) {
     return findCauseByName(err, name)
   }
 
+  /**
+   * @param {CustomError} cause
+   * @param {object} info
+   */
   static fullInfo (cause, info) {
     let existing
     if (cause && typeof cause.info === 'function') {
@@ -160,6 +190,11 @@ class WrappedError extends Error {
     return { ...info }
   }
 
+  /**
+   * @param {string} messageTmpl
+   * @param {Error} cause
+   * @param {object} info
+   */
   static wrap (messageTmpl, cause, info) {
     assert(typeof messageTmpl === 'string')
     assert(cause && isError(cause))
@@ -179,6 +214,9 @@ class WrappedError extends Error {
 exports.WError = WrappedError
 
 class MultiError extends Error {
+  /**
+   * @param {CustomError[]} errors
+   */
   constructor (errors) {
     assert(Array.isArray(errors))
     assert(errors.length >= 1)
@@ -224,6 +262,10 @@ class MultiError extends Error {
     }
   }
 
+  /**
+   * @param {Error[]} errors
+   * @returns {null | Error | MultiError}
+   */
   static errorFromList (errors) {
     assert(Array.isArray(errors))
 
@@ -239,6 +281,10 @@ class MultiError extends Error {
 }
 exports.MultiError = MultiError
 
+/**
+ * @param {CustomError} err
+ * @param {string} name
+ */
 function findCauseByName (err, name) {
   assert(isError(err))
   assert(typeof name === 'string')
@@ -254,6 +300,10 @@ function findCauseByName (err, name) {
 }
 exports.findCauseByName = findCauseByName
 
+/**
+ * @param {CustomError} err
+ * @returns {string}
+ */
 function fullStack (err) {
   assert(isError(err))
 
@@ -265,11 +315,20 @@ function fullStack (err) {
 }
 exports.fullStack = fullStack
 
+/**
+ * @param {string} messageTmpl
+ * @param {Error} cause
+ * @param {object} info
+ */
 function wrapf (messageTmpl, cause, info) {
   return WrappedError.wrap(messageTmpl, cause, info)
 }
 exports.wrapf = wrapf
 
+/**
+ * @param {string} messageTmpl
+ * @param {object} [info]
+ */
 function errorf (messageTmpl, info) {
   return StructuredError.create(messageTmpl, info)
 }
@@ -288,7 +347,11 @@ function createTypeStr (name) {
     .toLowerCase()
 }
 
+/**
+ * @param {CustomError} cause
+ */
 function getInfoForPlainError (cause) {
+  /** @type {{ [k: string]: unknown }} */
   const info = {}
   for (const field of PLAIN_ERROR_FIELDS) {
     if (typeof cause[field] !== 'undefined') {
@@ -298,10 +361,16 @@ function getInfoForPlainError (cause) {
   return info
 }
 
+/**
+ * @param {Error} err
+ */
 function isError (err) {
   return Object.prototype.toString.call(err) === '[object Error]'
 }
 
+/**
+ * @param {Error} err
+ */
 function getJSONForPlainError (err) {
   const obj = getInfoForPlainError(err)
   Object.assign(obj, {
@@ -316,7 +385,11 @@ function getJSONForPlainError (err) {
  * Taken from https://www.npmjs.com/package/string-template.
  * source: https://github.com/Matt-Esch/string-template
  */
+/**
+ * @param {string} string
+ */
 function stringTemplate (string) {
+  /** @type {{ [k: string]: unknown } | unknown[]} */
   var args
 
   if (arguments.length === 2 && typeof arguments[1] === 'object') {
