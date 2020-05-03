@@ -86,7 +86,7 @@ class WrappedError extends Error {
   constructor (message, cause, info) {
     super(message)
     assert(typeof message === 'string')
-    assert(typeof info === 'object')
+    assert(info === null || typeof info === 'object')
     assert(cause && isError(cause))
 
     this.name = this.constructor.name
