@@ -307,7 +307,7 @@ function fullStack (err) {
     return err.stack + '\nCaused by: ' + fullStack(err.cause())
   }
 
-  return err.stack
+  return err.stack || ''
 }
 exports.fullStack = fullStack
 
