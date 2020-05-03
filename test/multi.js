@@ -14,7 +14,7 @@ test('a MultiError', function t (assert) {
   const error2 = FanoutError.errorFromList([tempError])
   assert.ok(error2)
   assert.equal(error2, tempError)
-  assert.equal(error2.message, 'one error')
+  assert.equal(error2 && error2.message, 'one error')
 
   const error3 = new MultiError([tempError])
   assert.ok(error3)
@@ -52,7 +52,8 @@ test('a MultiError', function t (assert) {
     }
   )
 
-  const error4 = FanoutError.errorFromList([wErr1, wErr2])
+  const error4 = /** @type {MultiError} */
+    (FanoutError.errorFromList([wErr1, wErr2]))
 
   assert.ok(error4)
   assert.equal(error4.message,
@@ -75,6 +76,7 @@ test('a MultiError', function t (assert) {
       name: 'LevelReadError',
       cause: {
         message: 'DB not open',
+        type: 'error',
         name: 'Error'
       }
     }, {
@@ -85,6 +87,7 @@ test('a MultiError', function t (assert) {
       name: 'LevelReadError',
       cause: {
         message: 'DB already closed',
+        type: 'error',
         name: 'Error'
       }
     }]

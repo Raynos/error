@@ -16,7 +16,10 @@ test('a server error', function t (assert) {
   assert.equal(Server5XXError.type, 'server.5xx.error')
 
   assert.equal(error.type, 'server.5xx.error')
-  assert.equal(error.info().statusCode, 500)
+  assert.deepEqual(error.info(), {
+    statusCode: 500,
+    title: 'some title'
+  })
   assert.equal(error.message, 'some title server error, status=500')
   assert.equal(error.toString(),
     'Server5XXError: some title server error, status=500')
@@ -41,7 +44,7 @@ test('null fields', function t (assert) {
   class NullError extends SError {}
 
   const e = NullError.create('myError', {
-    length: null,
+    length: 'foo',
     buffer: null,
     state: null,
     expecting: null
@@ -63,7 +66,10 @@ test('a client error', function t (assert) {
   )
 
   assert.equal(error2.type, 'client.4xx.error')
-  assert.equal(error2.info().statusCode, 404)
+  assert.deepEqual(error2.info(), {
+    statusCode: 404,
+    title: 'some title'
+  })
   assert.equal(error2.message, 'some title client error, status=404')
   assert.equal(error2.toString(),
     'Client4XXError: some title client error, status=404')
