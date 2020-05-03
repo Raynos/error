@@ -343,6 +343,7 @@ function getTypeNameCached (name) {
   typeNameCache.set(name, type)
   return type
 }
+exports.getTypeName = getTypeNameCached
 
 /**
  * @param {string} name
