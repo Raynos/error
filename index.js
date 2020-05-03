@@ -29,6 +29,8 @@ const PLAIN_ERROR_FIELDS = [
   'operator'
 ]
 
+const typeNameCache = new Map()
+
 class StructuredError extends Error {
   /**
    * @param {string} message
@@ -40,7 +42,7 @@ class StructuredError extends Error {
     assert(typeof info === 'object')
 
     this.name = this.constructor.name
-    this.type = this.constructor.type
+    this.type = getTypeNameCached(this.name)
     this.__info = info
   }
 
@@ -60,11 +62,7 @@ class StructuredError extends Error {
   }
 
   static get type () {
-    if (hasOwnProperty.call(this, '__type')) {
-      return this.__type
-    }
-    this.__type = createTypeStr(this.name)
-    return this.__type
+    return getTypeNameCached(this.name)
   }
 
   /**
@@ -93,7 +91,7 @@ class WrappedError extends Error {
     assert(cause && isError(cause))
 
     this.name = this.constructor.name
-    this.type = this.constructor.type
+    this.type = getTypeNameCached(this.name)
     this.__info = info
     this.__cause = cause
   }
@@ -148,11 +146,7 @@ class WrappedError extends Error {
   }
 
   static get type () {
-    if (hasOwnProperty.call(this, '__type')) {
-      return this.__type
-    }
-    this.__type = createTypeStr(this.name)
-    return this.__type
+    return getTypeNameCached(this.name)
   }
 
   /**
@@ -233,7 +227,7 @@ class MultiError extends Error {
     this.__errors = errors
     this.name = this.constructor.name
     this.type = createTypeStr(this.name) + '--' +
-      errors[0].type || createTypeStr(errors[0].name)
+      getTypeNameCached(errors[0].name)
   }
 
   errors () {
@@ -334,6 +328,23 @@ function errorf (messageTmpl, info) {
 }
 exports.errorf = errorf
 
+/**
+ * @param {string} name
+ * @returns {string}
+ */
+function getTypeNameCached (name) {
+  if (typeNameCache.has(name)) {
+    return typeNameCache.get(name)
+  }
+
+  const type = createTypeStr(name)
+  typeNameCache.set(name, type)
+  return type
+}
+
+/**
+ * @param {string} name
+ */
 function createTypeStr (name) {
   if (name === 'SError') {
     return 'structured.error'
@@ -375,7 +386,7 @@ function getJSONForPlainError (err) {
   const obj = getInfoForPlainError(err)
   Object.assign(obj, {
     message: err.message,
-    type: err.type,
+    type: getTypeNameCached(err.name),
     name: err.name
   })
   return obj
