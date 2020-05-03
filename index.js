@@ -10,7 +10,6 @@ const nargs = /\{([0-9a-zA-Z_]+)\}/g
 const lowerCaseKebabRegex = /([a-z])([0-9A-Z])/g
 const upperCaseKebabRegex = /([A-Z])([A-Z])(?=[a-z])/g
 
-const hasOwnProperty = Object.prototype.hasOwnProperty
 const PLAIN_ERROR_FIELDS = [
   'code',
   'errno',
@@ -198,7 +197,7 @@ class WrappedError extends Error {
       WrappedError.fullInfo(cause, info)
     )
 
-    if (!info || !info.skipCauseMessage) {
+    if (!info || !Reflect.get(info, 'skipCauseMessage')) {
       msg = msg + ': ' + cause.message
     }
 
@@ -365,8 +364,9 @@ function getInfoForPlainError (cause) {
   /** @type {{ [k: string]: unknown }} */
   const info = {}
   for (const field of PLAIN_ERROR_FIELDS) {
-    if (typeof cause[field] !== 'undefined') {
-      info[field] = cause[field]
+    const v = Reflect.get(cause, field)
+    if (typeof v !== 'undefined') {
+      info[field] = v
     }
   }
   return info
@@ -423,7 +423,7 @@ function stringTemplate (string) {
             string[index + match.length] === '}') {
       return i
     } else {
-      result = hasOwnProperty.call(args, i) ? args[i] : null
+      result = i in args ? Reflect.get(args, i) : null
       if (result === null || result === undefined) {
         return ''
       }
