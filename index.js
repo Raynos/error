@@ -39,7 +39,7 @@ class StructuredError extends Error {
   constructor (message, info) {
     super(message)
     assert(typeof message === 'string')
-    assert(typeof info === 'object')
+    assert(info === null || typeof info === 'object')
 
     this.name = this.constructor.name
     this.type = getTypeNameCached(this.name)
