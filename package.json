@@ -18,13 +18,14 @@
   },
   "binDependencies": {
     "istanbul": "0.3.13",
-    "standard": "14.3.3"
+    "standard": "14.3.3",
+    "typescript": "3.8.3"
   },
   "dependencies": {},
   "devDependencies": {
     "@pre-bundled/tape": "5.0.0",
     "@types/node": "13.13.4",
-    "npm-bin-deps": "1.6.0"
+    "npm-bin-deps": "1.7.0"
   },
   "licenses": [
     {
@@ -33,6 +34,7 @@
     }
   ],
   "scripts": {
+    "check": "npr tsc -p .",
     "lint": "npr standard -v",
     "test": "npm run lint && node test/index.js",
     "travis-test": "npr istanbul cover ./test/index.js && ((cat coverage/lcov.info | coveralls) || exit 0)",
