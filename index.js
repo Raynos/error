@@ -283,12 +283,15 @@ function findCauseByName (err, name) {
   assert(typeof name === 'string')
   assert(name.length > 0)
 
-  do {
-    if (err.name === name) {
-      return err
+  /** @type {CustomError | null} */
+  let currentErr = err
+  while (currentErr) {
+    if (currentErr.name === name) {
+      return currentErr
     }
-    err = typeof err.cause === 'function' ? err.cause() : null
-  } while (err)
+    currentErr = typeof currentErr.cause === 'function'
+      ? currentErr.cause() : null
+  }
   return null
 }
 exports.findCauseByName = findCauseByName
