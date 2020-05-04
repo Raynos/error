@@ -28,23 +28,25 @@ const PLAIN_ERROR_FIELDS = [
   'operator'
 ]
 
+const EMPTY_OBJECT = {}
 const typeNameCache = new Map()
 
 class StructuredError extends Error {
   /**
    * @param {string} message
-   * @param {object | null} info
+   * @param {object} info
    */
   constructor (message, info) {
     super(message)
     assert(typeof message === 'string')
-    assert(info === null || typeof info === 'object')
+    assert(info !== null && typeof info === 'object')
 
     this.name = this.constructor.name
     this.type = getTypeNameCached(this.name)
     this.__info = info
   }
 
+  /** @returns {{ [k: string]: unknown }} */
   info () {
     return { ...this.__info }
   }
@@ -72,7 +74,7 @@ class StructuredError extends Error {
     assert(typeof messageTmpl === 'string')
     const msg = stringTemplate(messageTmpl, info)
 
-    return new this(msg, info || null)
+    return new this(msg, info || EMPTY_OBJECT)
   }
 }
 exports.SError = StructuredError
@@ -81,12 +83,12 @@ class WrappedError extends Error {
   /**
    * @param {string} message
    * @param {CustomError} cause
-   * @param {object | null} info
+   * @param {object} info
    */
   constructor (message, cause, info) {
     super(message)
     assert(typeof message === 'string')
-    assert(info === null || typeof info === 'object')
+    assert(info !== null && typeof info === 'object')
     assert(cause && isError(cause))
 
     this.name = this.constructor.name
@@ -116,6 +118,7 @@ class WrappedError extends Error {
     return this.__cause
   }
 
+  /** @returns {{ [k: string]: unknown }} */
   info () {
     return WrappedError.fullInfo(this.cause(), this.__info)
   }
@@ -165,7 +168,8 @@ class WrappedError extends Error {
 
   /**
    * @param {CustomError} cause
-   * @param {object | null} [info]
+   * @param {object} [info]
+   * @returns {{ [k: string]: unknown }}
    */
   static fullInfo (cause, info) {
     let existing
@@ -176,8 +180,7 @@ class WrappedError extends Error {
     }
 
     if (existing) {
-      Object.assign(existing, info)
-      return existing
+      return { ...existing, ...info }
     }
 
     return { ...info }
@@ -201,7 +204,7 @@ class WrappedError extends Error {
       msg = msg + ': ' + cause.message
     }
 
-    return new this(msg, cause, info || null)
+    return new this(msg, cause, info || EMPTY_OBJECT)
   }
 }
 exports.WError = WrappedError
