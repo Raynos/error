@@ -29,6 +29,7 @@ const PLAIN_ERROR_FIELDS = [
 ]
 
 const EMPTY_OBJECT = {}
+/** @type {Map<string, string>} */
 const typeNameCache = new Map()
 
 class StructuredError extends Error {
@@ -41,8 +42,11 @@ class StructuredError extends Error {
     assert(typeof message === 'string')
     assert(info !== null && typeof info === 'object')
 
+    /** @type {string} */
     this.name = this.constructor.name
+    /** @type {string} */
     this.type = getTypeNameCached(this.name)
+    /** @type {object} */
     this.__info = info
   }
 
@@ -62,13 +66,15 @@ class StructuredError extends Error {
     }
   }
 
+  /** @returns {string} */
   static get type () {
     return getTypeNameCached(this.name)
   }
 
   /**
    * @param {string} messageTmpl
-   * @param {object} [info]
+   * @param {{ [k: string]: unknown }} [info]
+   * @returns {StructuredError}
    */
   static create (messageTmpl, info) {
     assert(typeof messageTmpl === 'string')
@@ -91,12 +97,17 @@ class WrappedError extends Error {
     assert(info !== null && typeof info === 'object')
     assert(cause && isError(cause))
 
+    /** @type {string} */
     this.name = this.constructor.name
+    /** @type {string} */
     this.type = getTypeNameCached(this.name)
+    /** @type {object} */
     this.__info = info
+    /** @type {CustomError} */
     this.__cause = cause
   }
 
+  /** @returns {string} */
   fullType () {
     let causeType
     if (typeof this.__cause.fullType === 'function') {
@@ -114,6 +125,7 @@ class WrappedError extends Error {
     return this.type + '~!~' + causeType
   }
 
+  /** @returns {CustomError} */
   cause () {
     return this.__cause
   }
@@ -147,12 +159,14 @@ class WrappedError extends Error {
     }
   }
 
+  /** @returns {string} */
   static get type () {
     return getTypeNameCached(this.name)
   }
 
   /**
    * @param {Error} err
+   * @returns {string}
    */
   static fullStack (err) {
     return fullStack(err)
@@ -161,13 +175,14 @@ class WrappedError extends Error {
   /**
    * @param {Error} err
    * @param {string} name
+   * @returns {CustomError | null}
    */
   static findCauseByName (err, name) {
     return findCauseByName(err, name)
   }
 
   /**
-   * @param {CustomError} cause
+   * @param {CustomError | null} cause
    * @param {object} [info]
    * @returns {{ [k: string]: unknown }}
    */
@@ -190,6 +205,7 @@ class WrappedError extends Error {
    * @param {string} messageTmpl
    * @param {Error} cause
    * @param {object} [info]
+   * @returns {WrappedError}
    */
   static wrap (messageTmpl, cause, info) {
     assert(typeof messageTmpl === 'string')
@@ -226,16 +242,29 @@ class MultiError extends Error {
 
     super(msg)
 
+    /** @type {CustomError[]} */
     this.__errors = errors
+    /** @type {string} */
     this.name = this.constructor.name
+    /** @type {string} */
     this.type = createTypeStr(this.name) + '--' +
       getTypeNameCached(errors[0].name)
   }
 
+  /** @returns {CustomError[]} */
   errors () {
     return this.__errors.slice()
   }
 
+  /**
+   * @returns {{
+   *    message: string,
+   *    stack: string,
+   *    type: string,
+   *    name: string,
+   *    errors: object[]
+   * }}
+   */
   toJSON () {
     const out = []
     for (const e of this.__errors) {
@@ -280,6 +309,7 @@ exports.MultiError = MultiError
 /**
  * @param {CustomError} err
  * @param {string} name
+ * @returns {CustomError | null}
  */
 function findCauseByName (err, name) {
   assert(isError(err))
@@ -318,6 +348,7 @@ exports.fullStack = fullStack
  * @param {string} messageTmpl
  * @param {Error} cause
  * @param {object} info
+ * @returns {WrappedError}
  */
 function wrapf (messageTmpl, cause, info) {
   return WrappedError.wrap(messageTmpl, cause, info)
@@ -326,7 +357,8 @@ exports.wrapf = wrapf
 
 /**
  * @param {string} messageTmpl
- * @param {object} [info]
+ * @param {{ [k: string]: unknown }} [info]
+ * @returns {StructuredError}
  */
 function errorf (messageTmpl, info) {
   return StructuredError.create(messageTmpl, info)
@@ -350,6 +382,7 @@ exports.getTypeName = getTypeNameCached
 
 /**
  * @param {string} name
+ * @returns {string}
  */
 function createTypeStr (name) {
   if (name === 'SError') {
@@ -366,6 +399,7 @@ function createTypeStr (name) {
 
 /**
  * @param {CustomError} cause
+ * @returns {{ [k: string]: unknown }}
  */
 function getInfoForPlainError (cause) {
   /** @type {{ [k: string]: unknown }} */
@@ -381,6 +415,7 @@ function getInfoForPlainError (cause) {
 
 /**
  * @param {Error} err
+ * @returns {boolean}
  */
 function isError (err) {
   return Object.prototype.toString.call(err) === '[object Error]'
@@ -388,6 +423,7 @@ function isError (err) {
 
 /**
  * @param {Error} err
+ * @returns {{ [k: string]: unknown }}
  */
 function getJSONForPlainError (err) {
   const obj = getInfoForPlainError(err)
