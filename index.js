@@ -444,37 +444,28 @@ function getJSONForPlainError (err) {
  */
 /**
  * @param {string} string
+ * @param {{ [k: string]: unknown }} [object]
+ * @returns {string}
  */
-function stringTemplate (string) {
-  /** @type {{ [k: string]: unknown } | unknown[]} */
-  var args
+function stringTemplate (string, object) {
+  if (!object) return string
 
-  if (arguments.length === 2 && typeof arguments[1] === 'object') {
-    args = arguments[1]
-  } else {
-    args = new Array(arguments.length - 1)
-    for (var i = 1; i < arguments.length; ++i) {
-      args[i - 1] = arguments[i]
-    }
-  }
-
-  if (!args || !args.hasOwnProperty) {
-    args = {}
-  }
-
-  return string.replace(nargs, function replaceArg (match, i, index) {
-    var result
-
+  return string.replace(nargs, function replaceArg (
+    /** @type {string} */ match,
+    /** @type {string} */ word,
+    /** @type {number} */ index
+  ) {
     if (string[index - 1] === '{' &&
-            string[index + match.length] === '}') {
-      return i
+        string[index + match.length] === '}'
+    ) {
+      return word
     } else {
-      result = i in args ? Reflect.get(args, i) : null
+      const result = word in object ? object[word] : null
       if (result === null || result === undefined) {
         return ''
       }
 
-      return result
+      return String(result)
     }
   })
 }
