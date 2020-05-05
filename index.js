@@ -373,11 +373,12 @@ exports.errorf = errorf
  * @returns {string}
  */
 function getTypeNameCached (name) {
-  if (typeNameCache.has(name)) {
-    return typeNameCache.get(name)
+  let type = typeNameCache.get(name)
+  if (type) {
+    return type
   }
 
-  const type = createTypeStr(name)
+  type = createTypeStr(name)
   typeNameCache.set(name, type)
   return type
 }
