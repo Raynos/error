@@ -2,11 +2,14 @@
 
 const assert = require('assert')
 
+/**
+ * @typedef {import('./interfaces').CustomError} CustomError
+ */
+
 const nargs = /\{([0-9a-zA-Z_]+)\}/g
 const lowerCaseKebabRegex = /([a-z])([0-9A-Z])/g
 const upperCaseKebabRegex = /([A-Z])([A-Z])(?=[a-z])/g
 
-const hasOwnProperty = Object.prototype.hasOwnProperty
 const PLAIN_ERROR_FIELDS = [
   'code',
   'errno',
@@ -25,21 +28,36 @@ const PLAIN_ERROR_FIELDS = [
   'operator'
 ]
 
+const EMPTY_OBJECT = {}
+/** @type {Map<string, string>} */
+const typeNameCache = new Map()
+/** @type {(o: object, k: string) => unknown} */
+const reflectGet = Reflect.get
+
 class StructuredError extends Error {
+  /**
+   * @param {string} message
+   * @param {object} info
+   */
   constructor (message, info) {
     super(message)
     assert(typeof message === 'string')
-    assert(typeof info === 'object')
+    assert(info !== null && typeof info === 'object')
 
+    /** @type {string} */
     this.name = this.constructor.name
-    this.type = this.constructor.type
+    /** @type {string} */
+    this.type = getTypeNameCached(this.name)
+    /** @type {object} */
     this.__info = info
   }
 
+  /** @returns {{ [k: string]: unknown }} */
   info () {
     return { ...this.__info }
   }
 
+  /** @returns {{ [k: string]: unknown }} */
   toJSON () {
     return {
       ...this.__info,
@@ -50,37 +68,50 @@ class StructuredError extends Error {
     }
   }
 
+  /** @returns {string} */
   static get type () {
-    if (hasOwnProperty.call(this, '__type')) {
-      return this.__type
-    }
-    this.__type = createTypeStr(this.name)
-    return this.__type
+    return getTypeNameCached(this.name)
   }
 
+  /**
+   * @param {string} messageTmpl
+   * @param {{ [k: string]: unknown }} [info]
+   * @returns {StructuredError}
+   */
   static create (messageTmpl, info) {
     assert(typeof messageTmpl === 'string')
     const msg = stringTemplate(messageTmpl, info)
 
-    return new this(msg, info || null)
+    return new this(msg, info || EMPTY_OBJECT)
   }
 }
 exports.SError = StructuredError
 
 class WrappedError extends Error {
+  /**
+   * @param {string} message
+   * @param {CustomError} cause
+   * @param {object} info
+   */
   constructor (message, cause, info) {
     super(message)
     assert(typeof message === 'string')
-    assert(typeof info === 'object')
-    assert(cause && isError(cause))
+    assert(info !== null && typeof info === 'object')
+    assert(isError(cause))
 
+    /** @type {string} */
     this.name = this.constructor.name
-    this.type = this.constructor.type
+    /** @type {string} */
+    this.type = getTypeNameCached(this.name)
+    /** @type {object} */
     this.__info = info
+    /** @type {CustomError} */
     this.__cause = cause
   }
 
+  /** @returns {string} */
   fullType () {
+    /** @type {string} */
     let causeType
     if (typeof this.__cause.fullType === 'function') {
       causeType = this.__cause.fullType()
@@ -89,7 +120,7 @@ class WrappedError extends Error {
     } else if (this.__cause.errno || this.__cause.syscall) {
       causeType = 'error.wrapped-io.' +
         (this.__cause.syscall || 'unknown') + '.' +
-        (this.__cause.errno)
+        (this.__cause.errno || '')
     } else {
       causeType = 'error.wrapped-unknown'
     }
@@ -97,15 +128,19 @@ class WrappedError extends Error {
     return this.type + '~!~' + causeType
   }
 
+  /** @returns {CustomError} */
   cause () {
     return this.__cause
   }
 
+  /** @returns {{ [k: string]: unknown }} */
   info () {
     return WrappedError.fullInfo(this.cause(), this.__info)
   }
 
+  /** @returns {{ [k: string]: unknown }} */
   toJSON () {
+    /** @type {{ [k: string]: unknown }} */
     let causeJSON
     if (typeof this.__cause.toJSON === 'function') {
       causeJSON = this.__cause.toJSON()
@@ -128,23 +163,35 @@ class WrappedError extends Error {
     }
   }
 
+  /** @returns {string} */
   static get type () {
-    if (hasOwnProperty.call(this, '__type')) {
-      return this.__type
-    }
-    this.__type = createTypeStr(this.name)
-    return this.__type
+    return getTypeNameCached(this.name)
   }
 
+  /**
+   * @param {Error} err
+   * @returns {string}
+   */
   static fullStack (err) {
     return fullStack(err)
   }
 
+  /**
+   * @param {Error} err
+   * @param {string} name
+   * @returns {CustomError | null}
+   */
   static findCauseByName (err, name) {
     return findCauseByName(err, name)
   }
 
+  /**
+   * @param {CustomError | null} cause
+   * @param {object} [info]
+   * @returns {{ [k: string]: unknown }}
+   */
   static fullInfo (cause, info) {
+    /** @type {{ [k: string]: unknown } | undefined} */
     let existing
     if (cause && typeof cause.info === 'function') {
       existing = cause.info()
@@ -153,32 +200,40 @@ class WrappedError extends Error {
     }
 
     if (existing) {
-      Object.assign(existing, info)
-      return existing
+      return { ...existing, ...info }
     }
 
     return { ...info }
   }
 
+  /**
+   * @param {string} messageTmpl
+   * @param {Error} cause
+   * @param {object} [info]
+   * @returns {WrappedError}
+   */
   static wrap (messageTmpl, cause, info) {
     assert(typeof messageTmpl === 'string')
-    assert(cause && isError(cause))
+    assert(isError(cause))
 
     let msg = stringTemplate(
       messageTmpl,
       WrappedError.fullInfo(cause, info)
     )
 
-    if (!info || !info.skipCauseMessage) {
+    if (!info || !reflectGet(info, 'skipCauseMessage')) {
       msg = msg + ': ' + cause.message
     }
 
-    return new this(msg, cause, info || null)
+    return new this(msg, cause, info || EMPTY_OBJECT)
   }
 }
 exports.WError = WrappedError
 
 class MultiError extends Error {
+  /**
+   * @param {CustomError[]} errors
+   */
   constructor (errors) {
     assert(Array.isArray(errors))
     assert(errors.length >= 1)
@@ -186,23 +241,37 @@ class MultiError extends Error {
       assert(isError(err))
     }
 
-    let msg = 'First of ' + errors.length
+    let msg = 'First of ' + String(errors.length)
     msg += ' error' + (errors.length > 1 ? 's' : '')
     msg += ': ' + errors[0].message
 
     super(msg)
 
+    /** @type {CustomError[]} */
     this.__errors = errors
+    /** @type {string} */
     this.name = this.constructor.name
+    /** @type {string} */
     this.type = createTypeStr(this.name) + '--' +
-      errors[0].type || createTypeStr(errors[0].name)
+      getTypeNameCached(errors[0].name)
   }
 
+  /** @returns {CustomError[]} */
   errors () {
     return this.__errors.slice()
   }
 
+  /**
+   * @returns {{
+   *    message: string,
+   *    stack: string,
+   *    type: string,
+   *    name: string,
+   *    errors: object[]
+   * }}
+   */
   toJSON () {
+    /** @type {object[]} */
     const out = []
     for (const e of this.__errors) {
       if (typeof e.toJSON === 'function') {
@@ -217,13 +286,17 @@ class MultiError extends Error {
     }
     return {
       message: this.message,
-      stack: this.stack,
+      stack: this.stack || '',
       type: this.type,
       name: this.name,
       errors: out
     }
   }
 
+  /**
+   * @param {Error[]} errors
+   * @returns {null | Error | MultiError}
+   */
   static errorFromList (errors) {
     assert(Array.isArray(errors))
 
@@ -239,42 +312,86 @@ class MultiError extends Error {
 }
 exports.MultiError = MultiError
 
+/**
+ * @param {CustomError} err
+ * @param {string} name
+ * @returns {CustomError | null}
+ */
 function findCauseByName (err, name) {
   assert(isError(err))
   assert(typeof name === 'string')
   assert(name.length > 0)
 
-  do {
-    if (err.name === name) {
-      return err
+  /** @type {CustomError | null} */
+  let currentErr = err
+  while (currentErr) {
+    if (currentErr.name === name) {
+      return currentErr
     }
-    err = typeof err.cause === 'function' ? err.cause() : null
-  } while (err)
+    currentErr = typeof currentErr.cause === 'function'
+      ? currentErr.cause() : null
+  }
   return null
 }
 exports.findCauseByName = findCauseByName
 
+/**
+ * @param {CustomError} err
+ * @returns {string}
+ */
 function fullStack (err) {
   assert(isError(err))
 
+  const stack = err.stack || ''
   if (typeof err.cause === 'function') {
-    return err.stack + '\nCaused by: ' + fullStack(err.cause())
+    return stack + '\nCaused by: ' + fullStack(err.cause())
   }
 
-  return err.stack
+  return stack || ''
 }
 exports.fullStack = fullStack
 
+/**
+ * @param {string} messageTmpl
+ * @param {Error} cause
+ * @param {object} info
+ * @returns {WrappedError}
+ */
 function wrapf (messageTmpl, cause, info) {
   return WrappedError.wrap(messageTmpl, cause, info)
 }
 exports.wrapf = wrapf
 
+/**
+ * @param {string} messageTmpl
+ * @param {{ [k: string]: unknown }} [info]
+ * @returns {StructuredError}
+ */
 function errorf (messageTmpl, info) {
   return StructuredError.create(messageTmpl, info)
 }
 exports.errorf = errorf
 
+/**
+ * @param {string} name
+ * @returns {string}
+ */
+function getTypeNameCached (name) {
+  let type = typeNameCache.get(name)
+  if (type) {
+    return type
+  }
+
+  type = createTypeStr(name)
+  typeNameCache.set(name, type)
+  return type
+}
+exports.getTypeName = getTypeNameCached
+
+/**
+ * @param {string} name
+ * @returns {string}
+ */
 function createTypeStr (name) {
   if (name === 'SError') {
     return 'structured.error'
@@ -288,25 +405,39 @@ function createTypeStr (name) {
     .toLowerCase()
 }
 
+/**
+ * @param {CustomError} cause
+ * @returns {{ [k: string]: unknown }}
+ */
 function getInfoForPlainError (cause) {
+  /** @type {{ [k: string]: unknown }} */
   const info = {}
   for (const field of PLAIN_ERROR_FIELDS) {
-    if (typeof cause[field] !== 'undefined') {
-      info[field] = cause[field]
+    const v = reflectGet(cause, field)
+    if (typeof v !== 'undefined') {
+      info[field] = v
     }
   }
   return info
 }
 
+/**
+ * @param {Error} err
+ * @returns {boolean}
+ */
 function isError (err) {
   return Object.prototype.toString.call(err) === '[object Error]'
 }
 
+/**
+ * @param {Error} err
+ * @returns {{ [k: string]: unknown }}
+ */
 function getJSONForPlainError (err) {
   const obj = getInfoForPlainError(err)
   Object.assign(obj, {
     message: err.message,
-    type: err.type,
+    type: getTypeNameCached(err.name),
     name: err.name
   })
   return obj
@@ -316,35 +447,30 @@ function getJSONForPlainError (err) {
  * Taken from https://www.npmjs.com/package/string-template.
  * source: https://github.com/Matt-Esch/string-template
  */
-function stringTemplate (string) {
-  var args
+/**
+ * @param {string} string
+ * @param {{ [k: string]: unknown }} [object]
+ * @returns {string}
+ */
+function stringTemplate (string, object) {
+  if (!object) return string
 
-  if (arguments.length === 2 && typeof arguments[1] === 'object') {
-    args = arguments[1]
-  } else {
-    args = new Array(arguments.length - 1)
-    for (var i = 1; i < arguments.length; ++i) {
-      args[i - 1] = arguments[i]
-    }
-  }
-
-  if (!args || !args.hasOwnProperty) {
-    args = {}
-  }
-
-  return string.replace(nargs, function replaceArg (match, i, index) {
-    var result
-
+  return string.replace(nargs, function replaceArg (
+    /** @type {string} */ match,
+    /** @type {string} */ word,
+    /** @type {number} */ index
+  ) {
     if (string[index - 1] === '{' &&
-            string[index + match.length] === '}') {
-      return i
+        string[index + match.length] === '}'
+    ) {
+      return word
     } else {
-      result = hasOwnProperty.call(args, i) ? args[i] : null
+      const result = word in object ? object[word] : null
       if (result === null || result === undefined) {
         return ''
       }
 
-      return result
+      return String(result)
     }
   })
 }

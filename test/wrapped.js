@@ -1,13 +1,17 @@
 'use strict'
 
-const test = require('tape')
+const test = require('@pre-bundled/tape')
 const net = require('net')
 
-const { WError } = require('../index.js')
+const { WError, getTypeName } = require('../index.js')
+
+/** @type {(o: object, k: string) => unknown} */
+const reflectGet = Reflect.get
 
 test('can create a wrapped error', function t (assert) {
   class ServerListenFailedError extends WError {}
 
+  /** @type {Error & { code?: string }} */
   var err = new Error('listen EADDRINUSE')
   err.code = 'EADDRINUSE'
 
@@ -24,9 +28,11 @@ test('can create a wrapped error', function t (assert) {
   )
 
   assert.equal(err2.message, 'server failed: listen EADDRINUSE')
-  assert.equal(err2.info().requestedPort, 3426)
-  assert.equal(err2.info().host, 'localhost')
-  assert.equal(err2.info().code, 'EADDRINUSE')
+  assert.deepEqual(err2.info(), {
+    requestedPort: 3426,
+    host: 'localhost',
+    code: 'EADDRINUSE'
+  })
 
   assert.equal(err2.cause(), err)
 
@@ -46,6 +52,7 @@ test('can create a wrapped error', function t (assert) {
     cause: {
       code: err.code,
       message: err.message,
+      type: 'error',
       name: err.name
     }
   }))
@@ -56,6 +63,7 @@ test('can create a wrapped error', function t (assert) {
 test('can create wrapped error with syscall', function t (assert) {
   class SyscallError extends WError {}
 
+  /** @type {Error & { code?: string, syscall?: string }} */
   const err = new Error('listen EADDRINUSE')
   err.code = 'EADDRINUSE'
   err.syscall = 'listen'
@@ -66,8 +74,10 @@ test('can create wrapped error with syscall', function t (assert) {
 
   assert.equal(err2.message, 'tchannel socket error ' +
     '(EADDRINUSE from listen): listen EADDRINUSE')
-  assert.equal(err2.info().syscall, 'listen')
-  assert.equal(err2.info().code, 'EADDRINUSE')
+  assert.deepEqual(err2.info(), {
+    syscall: 'listen',
+    code: 'EADDRINUSE'
+  })
   assert.equal(err2.type, 'syscall.error')
 
   assert.end()
@@ -76,6 +86,7 @@ test('can create wrapped error with syscall', function t (assert) {
 test('wrapping with skipCauseMessage', function t (assert) {
   class SyscallError extends WError {}
 
+  /** @type {Error & { code?: string, syscall?: string }} */
   const err = new Error('listen EADDRINUSE')
   err.code = 'EADDRINUSE'
   err.syscall = 'listen'
@@ -88,8 +99,11 @@ test('wrapping with skipCauseMessage', function t (assert) {
 
   assert.equal(err2.message, 'tchannel socket error ' +
     '(EADDRINUSE from listen)')
-  assert.equal(err2.info().syscall, 'listen')
-  assert.equal(err2.info().code, 'EADDRINUSE')
+  assert.deepEqual(err2.info(), {
+    syscall: 'listen',
+    code: 'EADDRINUSE',
+    skipCauseMessage: true
+  })
   assert.equal(err2.type, 'syscall.error')
 
   assert.end()
@@ -134,6 +148,7 @@ test('wrapping twice', function t (assert) {
         name: 'ReadError',
         cause: {
           message: 'oops',
+          type: 'error',
           name: 'Error'
         }
       }
@@ -165,14 +180,20 @@ test('can wrap real IO errors', function t (assert) {
   otherServer.once('listening', onPortAllocated)
   otherServer.listen(0)
 
+  /** @returns {void} */
   function onPortAllocated () {
-    const port = otherServer.address().port
+    const addr = /** @type {{port: number}} */ (otherServer.address())
+    const port = addr.port
 
     const server = net.createServer()
     server.on('error', onError)
 
     server.listen(port)
 
+    /**
+     * @param {Error} cause
+     * @returns {void}
+     */
     function onError (cause) {
       const err = ServerListenFailedError.wrap(
         'server listen failed', cause, {
@@ -186,12 +207,22 @@ test('can wrap real IO errors', function t (assert) {
     }
   }
 
+  /**
+   * @param {ServerListenFailedError} err
+   * @param {Error} cause
+   * @param {number} port
+   * @returns {void}
+   */
   function assertOnError (err, cause, port) {
     assert.ok(err.message.indexOf('server listen failed: ') >= 0)
     assert.ok(err.message.indexOf('listen EADDRINUSE') >= 0)
-    assert.equal(err.info().requestedPort, port)
-    assert.equal(err.info().host, 'localhost')
-    assert.equal(err.info().code, 'EADDRINUSE')
+    assert.deepEqual(err.info(), {
+      requestedPort: port,
+      host: 'localhost',
+      code: 'EADDRINUSE',
+      syscall: 'listen',
+      errno: 'EADDRINUSE'
+    })
 
     assert.equal(err.cause(), cause)
 
@@ -216,6 +247,7 @@ test('can wrap real IO errors', function t (assert) {
         errno: 'EADDRINUSE',
         syscall: 'listen',
         message: err.cause().message,
+        type: 'error',
         name: 'Error'
       }
     }))
@@ -227,15 +259,8 @@ test('can wrap real IO errors', function t (assert) {
 test('can wrap assert errors', function t (assert) {
   class TestError extends WError {}
 
-  let assertError
-  try {
-    require('assert').strictEqual('a', 'b')
-  } catch (_err) {
-    assertError = _err
-  }
-
-  const err = TestError.wrap('error', assertError)
-  assert.equal(err.cause().actual, 'a')
+  const err = TestError.wrap('error', createAssertionError())
+  assert.deepEqual(Reflect.get(err.cause(), 'actual'), 'a')
 
   if (err.message === "error: 'a' === 'b'") {
     assert.equal(err.message, "error: 'a' === 'b'")
@@ -245,16 +270,14 @@ test('can wrap assert errors', function t (assert) {
   }
 
   assert.ok(err.cause().name.includes('AssertionError'))
-  assert.ok(
-    err.info().operator === '===' ||
-    err.info().operator === 'strictEqual'
-  )
+  const operator = reflectGet(err.info(), 'operator')
+  assert.ok(operator === '===' || operator === 'strictEqual')
 
   assert.equal(JSON.stringify(err), JSON.stringify({
     code: 'ERR_ASSERTION',
     actual: 'a',
     expected: 'b',
-    operator: err.info().operator,
+    operator: operator,
     message: 'error: ' + err.cause().message,
     stack: err.stack,
     type: 'test.error',
@@ -264,11 +287,23 @@ test('can wrap assert errors', function t (assert) {
       code: 'ERR_ASSERTION',
       actual: 'a',
       expected: 'b',
-      operator: err.cause().operator,
+      operator: reflectGet(err.cause(), 'operator'),
       message: err.cause().message,
+      type: getTypeName(err.cause().name),
       name: err.cause().name
     }
   }))
 
   assert.end()
 })
+
+/** @returns {Error} */
+function createAssertionError () {
+  try {
+    require('assert').strictEqual('a', 'b')
+    return new Error('never')
+  } catch (_err) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return /** @type {Error} */ (_err)
+  }
+}
