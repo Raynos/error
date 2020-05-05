@@ -31,6 +31,8 @@ const PLAIN_ERROR_FIELDS = [
 const EMPTY_OBJECT = {}
 /** @type {Map<string, string>} */
 const typeNameCache = new Map()
+/** @type {(o: object, k: string) => unknown} */
+const reflectGet = Reflect.get
 
 class StructuredError extends Error {
   /**
@@ -216,7 +218,7 @@ class WrappedError extends Error {
       WrappedError.fullInfo(cause, info)
     )
 
-    if (!info || !Reflect.get(info, 'skipCauseMessage')) {
+    if (!info || !reflectGet(info, 'skipCauseMessage')) {
       msg = msg + ': ' + cause.message
     }
 
@@ -405,7 +407,7 @@ function getInfoForPlainError (cause) {
   /** @type {{ [k: string]: unknown }} */
   const info = {}
   for (const field of PLAIN_ERROR_FIELDS) {
-    const v = Reflect.get(cause, field)
+    const v = reflectGet(cause, field)
     if (typeof v !== 'undefined') {
       info[field] = v
     }
