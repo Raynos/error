@@ -97,7 +97,7 @@ class WrappedError extends Error {
     super(message)
     assert(typeof message === 'string')
     assert(info !== null && typeof info === 'object')
-    assert(cause && isError(cause))
+    assert(isError(cause))
 
     /** @type {string} */
     this.name = this.constructor.name
@@ -119,7 +119,7 @@ class WrappedError extends Error {
     } else if (this.__cause.errno || this.__cause.syscall) {
       causeType = 'error.wrapped-io.' +
         (this.__cause.syscall || 'unknown') + '.' +
-        (this.__cause.errno)
+        (this.__cause.errno || '')
     } else {
       causeType = 'error.wrapped-unknown'
     }
@@ -211,7 +211,7 @@ class WrappedError extends Error {
    */
   static wrap (messageTmpl, cause, info) {
     assert(typeof messageTmpl === 'string')
-    assert(cause && isError(cause))
+    assert(isError(cause))
 
     let msg = stringTemplate(
       messageTmpl,
@@ -238,7 +238,7 @@ class MultiError extends Error {
       assert(isError(err))
     }
 
-    let msg = 'First of ' + errors.length
+    let msg = 'First of ' + String(errors.length)
     msg += ' error' + (errors.length > 1 ? 's' : '')
     msg += ': ' + errors[0].message
 
@@ -282,7 +282,7 @@ class MultiError extends Error {
     }
     return {
       message: this.message,
-      stack: this.stack,
+      stack: this.stack || '',
       type: this.type,
       name: this.name,
       errors: out
@@ -338,11 +338,12 @@ exports.findCauseByName = findCauseByName
 function fullStack (err) {
   assert(isError(err))
 
+  const stack = err.stack || ''
   if (typeof err.cause === 'function') {
-    return err.stack + '\nCaused by: ' + fullStack(err.cause())
+    return stack + '\nCaused by: ' + fullStack(err.cause())
   }
 
-  return err.stack || ''
+  return stack || ''
 }
 exports.fullStack = fullStack
 
