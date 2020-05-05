@@ -6,6 +6,6 @@ export interface CustomError extends Error {
 
   cause?(): Error;
   fullType?(this: CustomError): string;
-  info?(): object;
+  info?(): { [k: string]: unknown };
   toJSON?(): { [k: string]: unknown };
 }

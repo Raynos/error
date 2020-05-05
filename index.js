@@ -111,6 +111,7 @@ class WrappedError extends Error {
 
   /** @returns {string} */
   fullType () {
+    /** @type {string} */
     let causeType
     if (typeof this.__cause.fullType === 'function') {
       causeType = this.__cause.fullType()
@@ -139,6 +140,7 @@ class WrappedError extends Error {
 
   /** @returns {{ [k: string]: unknown }} */
   toJSON () {
+    /** @type {{ [k: string]: unknown }} */
     let causeJSON
     if (typeof this.__cause.toJSON === 'function') {
       causeJSON = this.__cause.toJSON()
@@ -189,6 +191,7 @@ class WrappedError extends Error {
    * @returns {{ [k: string]: unknown }}
    */
   static fullInfo (cause, info) {
+    /** @type {{ [k: string]: unknown } | undefined} */
     let existing
     if (cause && typeof cause.info === 'function') {
       existing = cause.info()
@@ -268,6 +271,7 @@ class MultiError extends Error {
    * }}
    */
   toJSON () {
+    /** @type {object[]} */
     const out = []
     for (const e of this.__errors) {
       if (typeof e.toJSON === 'function') {
