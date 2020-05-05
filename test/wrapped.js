@@ -5,6 +5,9 @@ const net = require('net')
 
 const { WError, getTypeName } = require('../index.js')
 
+/** @type {(o: object, k: string) => unknown} */
+const reflectGet = Reflect.get
+
 test('can create a wrapped error', function t (assert) {
   class ServerListenFailedError extends WError {}
 
@@ -177,6 +180,7 @@ test('can wrap real IO errors', function t (assert) {
   otherServer.once('listening', onPortAllocated)
   otherServer.listen(0)
 
+  /** @returns {void} */
   function onPortAllocated () {
     const addr = /** @type {{port: number}} */ (otherServer.address())
     const port = addr.port
@@ -188,6 +192,7 @@ test('can wrap real IO errors', function t (assert) {
 
     /**
      * @param {Error} cause
+     * @returns {void}
      */
     function onError (cause) {
       const err = ServerListenFailedError.wrap(
@@ -206,6 +211,7 @@ test('can wrap real IO errors', function t (assert) {
    * @param {ServerListenFailedError} err
    * @param {Error} cause
    * @param {number} port
+   * @returns {void}
    */
   function assertOnError (err, cause, port) {
     assert.ok(err.message.indexOf('server listen failed: ') >= 0)
@@ -253,14 +259,7 @@ test('can wrap real IO errors', function t (assert) {
 test('can wrap assert errors', function t (assert) {
   class TestError extends WError {}
 
-  let assertError
-  try {
-    require('assert').strictEqual('a', 'b')
-  } catch (_err) {
-    assertError = _err
-  }
-
-  const err = TestError.wrap('error', assertError)
+  const err = TestError.wrap('error', createAssertionError())
   assert.deepEqual(Reflect.get(err.cause(), 'actual'), 'a')
 
   if (err.message === "error: 'a' === 'b'") {
@@ -271,7 +270,7 @@ test('can wrap assert errors', function t (assert) {
   }
 
   assert.ok(err.cause().name.includes('AssertionError'))
-  const operator = Reflect.get(err.info(), 'operator')
+  const operator = reflectGet(err.info(), 'operator')
   assert.ok(operator === '===' || operator === 'strictEqual')
 
   assert.equal(JSON.stringify(err), JSON.stringify({
@@ -288,7 +287,7 @@ test('can wrap assert errors', function t (assert) {
       code: 'ERR_ASSERTION',
       actual: 'a',
       expected: 'b',
-      operator: Reflect.get(err.cause(), 'operator'),
+      operator: reflectGet(err.cause(), 'operator'),
       message: err.cause().message,
       type: getTypeName(err.cause().name),
       name: err.cause().name
@@ -297,3 +296,14 @@ test('can wrap assert errors', function t (assert) {
 
   assert.end()
 })
+
+/** @returns {Error} */
+function createAssertionError () {
+  try {
+    require('assert').strictEqual('a', 'b')
+    return new Error('never')
+  } catch (_err) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return /** @type {Error} */ (_err)
+  }
+}
