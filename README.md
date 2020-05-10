@@ -16,7 +16,7 @@ check [v7.x][7.x] branch
 
 ## Using `error` with `async` / `await`
 
-Check out [`resultify`](https://www.npmjs.com/package/resultify) ! 
+Check out [`resultify`](https://www.npmjs.com/package/resultify) !
 
 The rest of the examples use plain vanilla callbacks.
 
@@ -365,6 +365,36 @@ function doStuff (filePath, cb) {
 When using the `MultiError` class it's recommended to always
 call the static `errorFromList` method instead of calling the
 constructor directly.
+
+## Usage from typescript
+
+The `error` library does not have an `index.d.ts` but does have
+full `jsdoc` annotations so it should be typesafe to use.
+
+You will need to configure your `tsconfig` appropiately ...
+
+```json
+{
+  "compilerOptions": {
+    ...
+    "allowJs": true,
+    ...
+  },
+  "include": [
+    "src/**/*.js",
+    "node_modules/error/index.js"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
+```
+
+Typescript does not understand well type source code in
+`node_modules` without an `index.d.ts` by default, so you
+need to tell it to include the implementation of `error/index.js`
+during type checking and to `allowJs` to enable typechecking
+js + jsdoc comments.
 
 ## Installation
 
