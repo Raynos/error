@@ -201,6 +201,8 @@ the type name.
  - `fullStack`; Take a wrapped error and compute a full stack.
  - `wrapf`; Utility function to quickly wrap
  - `errorf`; Utility function to quickly create an error
+ - `getInfo`; Utility function to get the info for any error
+object. Calls `err.info()` if the method exists.
 
 ### `WError`
 
@@ -325,6 +327,15 @@ and an info object.
 
 It will use [string-template][string-template] to apply the
 template with the `info` object as a parameter.
+
+### `SError.getInfo(error)`
+
+Static method to `getInfo` on a maybe error. The `error` can
+be `null` or `undefined`, it can be a plain `new Error()` or
+it can be a structured or wrapped error.
+
+Will return `err.info()` if it exists, returns `{}` if its `null`
+and returns `{ ...err }` if its a plain vanilla error.
 
 ### `serr.type`
 

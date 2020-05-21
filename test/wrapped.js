@@ -12,10 +12,10 @@ test('can create a wrapped error', function t (assert) {
   class ServerListenFailedError extends WError {}
 
   /** @type {Error & { code?: string }} */
-  var err = new Error('listen EADDRINUSE')
+  const err = new Error('listen EADDRINUSE')
   err.code = 'EADDRINUSE'
 
-  var err2 = ServerListenFailedError.wrap(
+  const err2 = ServerListenFailedError.wrap(
     'server failed', err, {
       requestedPort: 3426,
       host: 'localhost'
