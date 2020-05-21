@@ -2,8 +2,15 @@
 
 const assert = require('assert')
 
-/**
- * @typedef {import('./interfaces').CustomError} CustomError
+/** @typedef {{
+      type?: string;
+      errno?: string;
+      syscall?: string;
+      cause?(): Error;
+      fullType?(this: CustomError): string;
+      info?(): Record<string, unknown>;
+      toJSON?(): Record<string, unknown>;
+    } & Error} CustomError
  */
 
 const nargs = /\{([0-9a-zA-Z_]+)\}/g
@@ -52,12 +59,12 @@ class StructuredError extends Error {
     this.__info = info
   }
 
-  /** @returns {{ [k: string]: unknown }} */
+  /** @returns {Record<string, unknown>} */
   info () {
     return { ...this.__info }
   }
 
-  /** @returns {{ [k: string]: unknown }} */
+  /** @returns {Record<string, unknown>} */
   toJSON () {
     return {
       ...this.__info,
@@ -74,8 +81,21 @@ class StructuredError extends Error {
   }
 
   /**
+   * @param {CustomError | null} error
+   * @returns {Record<string, unknown>}
+   */
+  static getInfo (error) {
+    if (!error) return {}
+    if (typeof error.info !== 'function') {
+      return { ...error }
+    }
+
+    return error.info()
+  }
+
+  /**
    * @param {string} messageTmpl
-   * @param {{ [k: string]: unknown }} [info]
+   * @param {Record<string, unknown>} [info]
    * @returns {StructuredError}
    */
   static create (messageTmpl, info) {
@@ -133,14 +153,14 @@ class WrappedError extends Error {
     return this.__cause
   }
 
-  /** @returns {{ [k: string]: unknown }} */
+  /** @returns {Record<string, unknown>} */
   info () {
     return WrappedError.fullInfo(this.cause(), this.__info)
   }
 
-  /** @returns {{ [k: string]: unknown }} */
+  /** @returns {Record<string, unknown>} */
   toJSON () {
-    /** @type {{ [k: string]: unknown }} */
+    /** @type {Record<string, unknown>} */
     let causeJSON
     if (typeof this.__cause.toJSON === 'function') {
       causeJSON = this.__cause.toJSON()
@@ -188,10 +208,10 @@ class WrappedError extends Error {
   /**
    * @param {CustomError | null} cause
    * @param {object} [info]
-   * @returns {{ [k: string]: unknown }}
+   * @returns {Record<string, unknown>}
    */
   static fullInfo (cause, info) {
-    /** @type {{ [k: string]: unknown } | undefined} */
+    /** @type {Record<string, unknown> | undefined} */
     let existing
     if (cause && typeof cause.info === 'function') {
       existing = cause.info()
@@ -352,6 +372,15 @@ function fullStack (err) {
 exports.fullStack = fullStack
 
 /**
+ * @param {CustomError | null} error
+ * @returns {Record<string, unknown>}
+ */
+function getInfo (error) {
+  return StructuredError.getInfo(error)
+}
+exports.getInfo = getInfo
+
+/**
  * @param {string} messageTmpl
  * @param {Error} cause
  * @param {object} info
@@ -364,7 +393,7 @@ exports.wrapf = wrapf
 
 /**
  * @param {string} messageTmpl
- * @param {{ [k: string]: unknown }} [info]
+ * @param {Record<string, unknown>} [info]
  * @returns {StructuredError}
  */
 function errorf (messageTmpl, info) {
@@ -407,10 +436,10 @@ function createTypeStr (name) {
 
 /**
  * @param {CustomError} cause
- * @returns {{ [k: string]: unknown }}
+ * @returns {Record<string, unknown>}
  */
 function getInfoForPlainError (cause) {
-  /** @type {{ [k: string]: unknown }} */
+  /** @type {Record<string, unknown>} */
   const info = {}
   for (const field of PLAIN_ERROR_FIELDS) {
     const v = reflectGet(cause, field)
@@ -431,7 +460,7 @@ function isError (err) {
 
 /**
  * @param {Error} err
- * @returns {{ [k: string]: unknown }}
+ * @returns {Record<string, unknown>}
  */
 function getJSONForPlainError (err) {
   const obj = getInfoForPlainError(err)
@@ -449,7 +478,7 @@ function getJSONForPlainError (err) {
  */
 /**
  * @param {string} string
- * @param {{ [k: string]: unknown }} [object]
+ * @param {Record<string, unknown>} [object]
  * @returns {string}
  */
 function stringTemplate (string, object) {

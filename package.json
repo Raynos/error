@@ -31,7 +31,7 @@
   "devDependencies": {
     "@pre-bundled/tape": "5.0.0",
     "@types/node": "13.13.4",
-    "npm-bin-deps": "1.7.0"
+    "npm-bin-deps": "1.8.2"
   },
   "licenses": [
     {
