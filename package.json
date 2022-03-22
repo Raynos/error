@@ -33,12 +33,7 @@
     "@types/node": "13.13.4",
     "npm-bin-deps": "1.8.2"
   },
-  "licenses": [
-    {
-      "type": "MIT",
-      "url": "http://github.com/Raynos/error/raw/master/LICENSE"
-    }
-  ],
+  "license": "MIT",
   "scripts": {
     "check": "npr tsc -p .",
     "lint": "npr tsdocstandard -v",
