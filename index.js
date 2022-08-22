@@ -456,6 +456,8 @@ function getInfoForPlainError (cause) {
  */
 function isError (err) {
   return Object.prototype.toString.call(err) === '[object Error]'
+    ? true
+    : err instanceof Error
 }
 
 /**
